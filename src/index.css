@@ -1,0 +1,21 @@
+/* src/index.css */
+@import "tailwindcss";
+
+/* Cursor pointer para todos los botones y elementos interactivos */
+button {
+  cursor: pointer;
+}
+
+a {
+  cursor: pointer;
+}
+
+/* Smooth scroll para toda la página */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ajuste para el scroll con navbar fija */
+section {
+  scroll-margin-top: 5rem;
+}
