@@ -1,43 +1,40 @@
 // src/components/Services.tsx
-import { FaHotel, FaTshirt, FaTint, FaUsers, FaTruck, FaHardHat } from 'react-icons/fa'
+import { FaIndustry, FaTshirt, FaTruck } from 'react-icons/fa'
 
 export default function Services() {
   const services = [
     {
-      icon: FaHotel,
-      title: 'Hoteles',
-      description: 'Servicio de lavandería para la industria hotelera.',
-      features: ['Recogida programada', 'Lavado profesional', 'Servicio express']
+      icon: FaIndustry,
+      title: 'Lavandería Industrial y Corporativa',
+      description: 'Servicio especializado para la industria hotelera, minera y clientes corporativos.',
+      features: [
+        'Procesamiento de grandes volúmenes',
+        'Tratamiento especializado por tipo de tejido',
+        'Cumplimiento de normativas industriales',
+        'Servicio programado y express'
+      ]
     },
     {
       icon: FaTshirt,
-      title: 'Particular',
-      description: 'Lavado de ropa personal con cuidado profesional.',
-      features: ['Lavado y planchado', 'Prendas delicadas', 'Precios accesibles']
-    },
-    {
-      icon: FaTint,
-      title: 'Venta de Agua',
-      description: 'Agua purificada de calidad.',
-      features: ['Bidones varios tamaños', 'Entrega a domicilio', 'Certificación sanitaria']
-    },
-    {
-      icon: FaUsers,
-      title: 'Transporte Personal',
-      description: 'Movilización segura de trabajadores.',
-      features: ['Vehículos modernos', 'Conductores profesionales', 'Rutas flexibles']
+      title: 'Lavandería Doméstica y Particular',
+      description: 'Tratamiento experto para todo tipo de tejidos y prendas del hogar.',
+      features: [
+        'Lavado y planchado profesional',
+        'Cuidado especializado de prendas delicadas',
+        'Conocimiento técnico en diversos tejidos',
+        'Atención personalizada'
+      ]
     },
     {
       icon: FaTruck,
-      title: 'Transporte de Carga',
-      description: 'Logística y transporte para empresas.',
-      features: ['Carga liviana y pesada', 'Seguimiento GPS', 'Seguro incluido']
-    },
-    {
-      icon: FaHardHat,
-      title: 'Minería',
-      description: 'Lavado industrial especializado.',
-      features: ['Alto volumen', 'Tratamiento especializado', 'Normativas cumplidas']
+      title: 'Servicio de Retiro y Entrega',
+      description: 'Valor agregado para tu comodidad y mejor atención al cliente.',
+      features: [
+        'Recogida programada en tu domicilio',
+        'Entrega puntual y segura',
+        'Rutas establecidas',
+        'Seguimiento de tu pedido'
+      ]
     }
   ]
 

@@ -9,9 +9,9 @@ export default function Footer({ scrollToSection }: FooterProps) {
   const currentYear = new Date().getFullYear()
 
   const footerLinks = [
-    { label: 'Lavandería', id: 'servicios' },
-    { label: 'Transporte', id: 'transporte' },
-    { label: 'Agua', id: 'servicios' }
+    { label: 'Servicios de Lavandería', id: 'servicios' },
+    { label: 'Maquinaria', id: 'maquinaria' },
+    { label: 'Recepción', id: 'recepcion' }
   ]
 
   const socialLinks = [
@@ -29,10 +29,10 @@ export default function Footer({ scrollToSection }: FooterProps) {
               <div className="w-12 h-12 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-xl" aria-hidden="true">LC</span>
               </div>
-              <span className="ml-3 text-xl font-bold">Lavandería del Cobre</span>
+              <span className="ml-3 text-xl font-bold">Lavandería el Cobre</span>
             </div>
             <p className="text-[#a8a8ba] max-w-md text-base">
-              Servicios de lavandería, transporte y logística en Calama.
+              Servicios de lavandería industrial, corporativa y doméstica en Calama.
             </p>
           </div>
 
@@ -60,14 +60,14 @@ export default function Footer({ scrollToSection }: FooterProps) {
             <address className="not-italic space-y-2 text-[#a8a8ba] text-base">
               <p>+56 9 XXXX XXXX</p>
               <p>contacto@lavanderiacobre.cl</p>
-              <p>Calama, Antofagasta</p>
+              <p>Av. Balmaceda 1276, Calama</p>
             </address>
           </div>
         </div>
 
         <div className="border-t border-[#2c2c3e] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[#a8a8ba] text-sm">
-            © {currentYear} Lavandería del Cobre
+            © {currentYear} Lavandería el Cobre
           </p>
           <nav aria-label="Redes sociales">
             <div className="flex space-x-6">

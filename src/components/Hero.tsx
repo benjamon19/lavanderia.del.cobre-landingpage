@@ -41,7 +41,7 @@ export default function Hero({ scrollToSection }: HeroProps) {
                 </h1>
                 
                 <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-10 leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
-                  Servicios de lavandería, transporte y logística para empresas y particulares.
+                  Servicios de lavandería industrial, corporativa y doméstica en Calama.
                 </p>
                 
                 {/* Botones CTA mejorados */}
