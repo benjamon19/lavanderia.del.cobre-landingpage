@@ -29,8 +29,7 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
   const menuItems = [
     { label: 'Servicios', id: 'servicios' },
     { label: 'Maquinaria', id: 'maquinaria' },
-    { label: 'Recepción', id: 'recepcion' },
-    { label: 'Transporte', id: 'transporte' }
+    { label: 'Recepción', id: 'recepcion' }
   ]
 
   return (
@@ -59,17 +58,17 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
               
               {/* Texto completo - oculto en móvil pequeño */}
               <span className="ml-2 text-base font-bold text-[#1a1a2e] hidden min-[500px]:hidden sm:hidden md:hidden lg:block xl:block">
-                Lavandería del Cobre
+                Lavandería el Cobre
               </span>
               
               {/* Texto mediano - visible en tablets */}
               <span className="ml-2 text-base font-bold text-[#1a1a2e] hidden min-[500px]:hidden sm:hidden md:block lg:hidden">
-                Lavandería del Cobre
+                Lavandería el Cobre
               </span>
               
               {/* Texto corto - visible en móviles medianos */}
               <span className="ml-2 text-base font-bold text-[#1a1a2e] hidden min-[500px]:block sm:block md:hidden">
-                Lav. del Cobre
+                Lav. el Cobre
               </span>
             </button>
 

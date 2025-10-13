@@ -11,7 +11,7 @@ export default function Reception() {
     {
       icon: FaMapMarkerAlt,
       title: 'Ubicación',
-      lines: ['Calama, Región de Antofagasta']
+      lines: ['Av. Balmaceda 1276', 'Calama, Región de Antofagasta']
     },
     {
       icon: FaPhone,

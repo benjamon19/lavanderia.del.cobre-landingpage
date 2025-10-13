@@ -16,7 +16,7 @@ export default function Contact() {
     {
       icon: FaMapMarkerAlt,
       title: 'Dirección',
-      content: 'Calama, Antofagasta, Chile'
+      content: 'Av. Balmaceda 1276, Calama, Antofagasta'
     },
     {
       icon: FaClock,
@@ -94,12 +94,11 @@ export default function Contact() {
                   className="w-full px-4 py-3.5 rounded-xl bg-white/10 border-2 border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                   required
                 >
-                  <option value="" className="text-[#1a1a2e]">Selecciona</option>
-                  <option value="hoteles" className="text-[#1a1a2e]">Hoteles</option>
-                  <option value="particular" className="text-[#1a1a2e]">Particular</option>
-                  <option value="agua" className="text-[#1a1a2e]">Agua</option>
-                  <option value="transporte" className="text-[#1a1a2e]">Transporte</option>
-                  <option value="mineria" className="text-[#1a1a2e]">Minería</option>
+                  <option value="" className="text-[#1a1a2e]">Selecciona un servicio</option>
+                  <option value="industrial-corporativa" className="text-[#1a1a2e]">Lavandería Industrial y Corporativa</option>
+                  <option value="domestica-particular" className="text-[#1a1a2e]">Lavandería Doméstica y Particular</option>
+                  <option value="retiro-entrega" className="text-[#1a1a2e]">Servicio de Retiro y Entrega</option>
+                  <option value="otro" className="text-[#1a1a2e]">Otro / Consulta general</option>
                 </select>
               </div>
 

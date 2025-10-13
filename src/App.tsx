@@ -6,7 +6,6 @@ import Hero from './components/Hero'
 const Services = lazy(() => import('./components/Services'))
 const Machinery = lazy(() => import('./components/Machinery'))
 const Reception = lazy(() => import('./components/Reception'))
-const Transport = lazy(() => import('./components/Transport'))
 const Contact = lazy(() => import('./components/Contact'))
 const Footer = lazy(() => import('./components/Footer'))
 
@@ -21,7 +20,7 @@ function App() {
 
   // Scroll spy - detecta qué sección está visible y actualiza la URL
   useEffect(() => {
-    const sections = ['servicios', 'maquinaria', 'recepcion', 'transporte', 'contacto']
+    const sections = ['servicios', 'maquinaria', 'recepcion', 'contacto']
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -69,7 +68,6 @@ function App() {
         <Services />
         <Machinery />
         <Reception />
-        <Transport />
         <Contact />
         <Footer scrollToSection={scrollToSection} />
       </Suspense>
