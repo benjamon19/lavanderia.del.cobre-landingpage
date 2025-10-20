@@ -1,8 +1,9 @@
 // src/components/Navbar.tsx
 import { useState, useEffect } from 'react'
 import { HiMenu, HiX } from 'react-icons/hi'
-import { FaUser } from 'react-icons/fa'
+import { FaUser, FaSearch } from 'react-icons/fa'
 import Login from './Login'
+import TrackingModal from './TrackingModal'
 
 interface NavbarProps {
   scrollToSection: (id: string) => void
@@ -11,6 +12,7 @@ interface NavbarProps {
 export default function Navbar({ scrollToSection }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [trackingOpen, setTrackingOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -29,7 +31,8 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
   const menuItems = [
     { label: 'Servicios', id: 'servicios' },
     { label: 'Maquinaria', id: 'maquinaria' },
-    { label: 'Recepción', id: 'recepcion' }
+    { label: 'Recepción', id: 'recepcion' },
+    { label: 'Contacto', id: 'contacto' }
   ]
 
   return (
@@ -85,12 +88,12 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#ff6b35] transition-all group-hover:w-full" aria-hidden="true"></span>
                 </button>
               ))}
-              <button 
-                onClick={() => handleScroll('contacto')} 
-                className="bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white px-5 xl:px-6 py-2 xl:py-2.5 rounded-xl hover:shadow-lg transition-all font-semibold text-sm xl:text-base transform hover:-translate-y-0.5"
-                aria-label="Ir a contacto"
+              <button
+                onClick={() => setTrackingOpen(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white px-5 xl:px-6 py-2 xl:py-2.5 rounded-xl hover:shadow-lg transition-all font-semibold text-sm xl:text-base transform hover:-translate-y-0.5"
+                aria-label="Seguimiento de pedido"
               >
-                Contacto
+                <FaSearch className="text-xs xl:text-sm" aria-hidden="true" /> Seguimiento
               </button>
               <button
                 onClick={() => setLoginOpen(true)}
@@ -114,12 +117,12 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#ff6b35] transition-all group-hover:w-full" aria-hidden="true"></span>
                 </button>
               ))}
-              <button 
-                onClick={() => handleScroll('contacto')} 
-                className="bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all font-semibold text-sm transform hover:-translate-y-0.5"
-                aria-label="Ir a contacto"
+              <button
+                onClick={() => setTrackingOpen(true)}
+                className="flex items-center gap-2 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all font-semibold text-sm transform hover:-translate-y-0.5"
+                aria-label="Seguimiento de pedido"
               >
-                Contacto
+                <FaSearch className="text-xs" aria-hidden="true" />
               </button>
               <button
                 onClick={() => setLoginOpen(true)}
@@ -160,13 +163,16 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                   {item.label}
                 </button>
               ))}
-              <button 
-                onClick={() => handleScroll('contacto')} 
-                className="w-full text-left px-4 py-3.5 mt-3 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white hover:shadow-lg font-semibold rounded-xl transition-all"
+              <button
+                onClick={() => {
+                  setTrackingOpen(true)
+                  setMenuOpen(false)
+                }}
+                className="w-full text-left px-4 py-3.5 mt-3 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white hover:shadow-lg font-semibold rounded-xl flex items-center gap-2 transition-all"
                 role="menuitem"
-                aria-label="Ir a contacto"
+                aria-label="Seguimiento de pedido"
               >
-                Contacto
+                <FaSearch aria-hidden="true" /> Seguimiento
               </button>
               <button
                 onClick={() => {
@@ -186,6 +192,9 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
 
       {/* Modal Login */}
       <Login isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
+      
+      {/* Modal Seguimiento */}
+      <TrackingModal isOpen={trackingOpen} onClose={() => setTrackingOpen(false)} />
     </>
   )
 }
