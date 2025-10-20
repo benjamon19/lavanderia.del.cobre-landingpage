@@ -3,7 +3,11 @@ import {
   FaClipboardCheck, 
   FaTshirt, 
   FaWind, 
-  FaCheckCircle 
+  FaCheckCircle,
+  FaClock,
+  FaCheck,
+  FaSync,
+  FaInfoCircle
 } from 'react-icons/fa'
 import { GiIronCross } from 'react-icons/gi'
 
@@ -124,9 +128,9 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
                     <h3 className={`text-xl font-bold ${styles.text}`}>
                       {stage.name}
                     </h3>
-                    <span className={`text-sm font-medium ${styles.text}`}>
-                      {stage.status === 'in-progress' && '⏳ '}
-                      {stage.status === 'completed' && '✓ '}
+                    <span className={`text-sm font-medium ${styles.text} flex items-center gap-1.5`}>
+                      {stage.status === 'in-progress' && <FaClock className="text-sm" />}
+                      {stage.status === 'completed' && <FaCheck className="text-sm" />}
                       {stage.timestamp}
                     </span>
                   </div>
@@ -136,7 +140,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
                   
                   {stage.status === 'in-progress' && (
                     <div className="mt-4 inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-[#ff6b35] text-[#ff6b35] font-semibold text-sm">
-                      🔄 En proceso ahora
+                      <FaSync className="animate-spin" /> En proceso ahora
                     </div>
                   )}
                 </div>
@@ -147,9 +151,12 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       </div>
       
       <div className="mt-8 p-6 bg-[#fff4f0] rounded-xl border border-[#ffded0]">
-        <h3 className="font-semibold text-[#1a1a2e] mb-2">
-          ℹ️ Información Importante
-        </h3>
+        <div className="flex items-center gap-2 mb-2">
+          <FaInfoCircle className="text-[#ff6b35]" />
+          <h3 className="font-semibold text-[#1a1a2e]">
+            Información Importante
+          </h3>
+        </div>
         <p className="text-sm text-[#2c2c3e]">
           El tiempo estimado de cada etapa puede variar según la carga de trabajo. 
           Te notificaremos cuando tu pedido esté listo para retirar.
