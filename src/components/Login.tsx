@@ -1,6 +1,7 @@
 // src/components/Login.tsx
 import { useState } from 'react'
-import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaLightbulb } from 'react-icons/fa'
+import { useAuth } from '../context/AuthContext'
 
 interface LoginProps {
   isOpen: boolean
@@ -10,12 +11,27 @@ interface LoginProps {
 export default function Login({ isOpen, onClose }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const { login } = useAuth()
 
   if (!isOpen) return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    alert('Login no funcional - Solo prototipo')
+    setError('')
+    
+    // Validar que el email tenga 1, 2 o 3 para los roles
+    const success = login(email, password)
+    
+    if (success) {
+      onClose()
+      setEmail('')
+      setPassword('')
+    } else {
+      setError('Email inválido. Usa un email con 1 (admin), 2 (trabajador) o 3 (cliente)')
+    }
   }
 
   return (
@@ -56,7 +72,9 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 type="text"
                 id="login-email"
                 name="email"
-                placeholder="usuario@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin1@elcobre.cl"
                 className="w-full pl-12 pr-4 py-3.5 border-2 border-[#cfcfd8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e]"
                 required
               />
@@ -73,6 +91,8 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 type={showPassword ? 'text' : 'password'}
                 id="login-password"
                 name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full pl-12 pr-12 py-3.5 border-2 border-[#cfcfd8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e]"
                 required
@@ -106,12 +126,28 @@ export default function Login({ isOpen, onClose }: LoginProps) {
             </button>
           </div>
 
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 rounded-xl">
+              <p className="text-sm text-red-600 font-medium">{error}</p>
+            </div>
+          )}
+
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3.5 rounded-xl hover:shadow-lg transition-all font-semibold text-lg transform hover:-translate-y-0.5"
           >
             Iniciar Sesión
           </button>
+
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <FaLightbulb className="text-blue-600" />
+              <p className="text-xs text-blue-800 font-semibold">Ejemplos de acceso:</p>
+            </div>
+            <p className="text-xs text-blue-700">• Admin: admin1@elcobre.cl</p>
+            <p className="text-xs text-blue-700">• Trabajador: trabajador2@elcobre.cl</p>
+            <p className="text-xs text-blue-700">• Cliente: cliente3@gmail.com</p>
+          </div>
         </form>
       </div>
     </div>
