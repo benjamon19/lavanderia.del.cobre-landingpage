@@ -14,8 +14,8 @@ export default function Hero({ scrollToSection }: HeroProps) {
       {/* Decoración de fondo mejorada */}
       <div className="absolute inset-0" aria-hidden="true">
         {/* Círculos de luz más sutiles */}
-        <div className="absolute top-1/4 right-0 w-[800px] h-[800px] bg-[#ffb84d]/15 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#1a1a2e]/20 rounded-full blur-[100px]"></div>
+        <div className="absolute top-1/4 right-0 w-[700px] h-[700px] xl:w-[560px] xl:h-[560px] 2xl:w-[800px] 2xl:h-[800px] bg-[#ffb84d]/15 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-0 left-0 w-[520px] h-[520px] xl:w-[420px] xl:h-[420px] 2xl:w-[600px] 2xl:h-[600px] bg-[#1a1a2e]/20 rounded-full blur-[100px]"></div>
         
         {/* Textura sutil */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
@@ -25,22 +25,22 @@ export default function Hero({ scrollToSection }: HeroProps) {
       </div>
 
       {/* Contenido principal - con flex para distribuir el espacio */}
-      <div className="relative z-10 h-full flex flex-col pt-20 pb-24 sm:pb-32 lg:pb-40">
+      <div className="relative z-10 h-full flex flex-col pt-24 xl:pt-24 2xl:pt-24 pb-24 sm:pb-28 lg:pb-36 xl:pb-32 2xl:pb-36">
         <div className="flex-1 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 xl:gap-10 2xl:gap-16 items-center">
               
               {/* Contenido Izquierdo */}
               <div className="text-center lg:text-left">
                 <h1 
                   id="hero-heading"
-                  className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] mb-4 sm:mb-6 tracking-tight"
+                  className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-bold leading-[1.1] mb-3 sm:mb-5 tracking-tight"
                 >
                   Lavandería en{' '}
                   <span className="block text-[#ffb84d] mt-2">Calama</span>
                 </h1>
                 
-                <p className="text-lg sm:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-10 leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
+                <p className="text-base sm:text-lg lg:text-xl xl:text-xl 2xl:text-2xl text-white/90 mb-5 sm:mb-8 leading-relaxed font-light max-w-2xl mx-auto lg:mx-0">
                   Servicios de lavandería industrial, corporativa y doméstica en Calama.
                 </p>
                 
@@ -48,15 +48,15 @@ export default function Hero({ scrollToSection }: HeroProps) {
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
                   <button 
                     onClick={() => scrollToSection('contacto')} 
-                    className="group bg-white text-[#ff6b35] px-8 sm:px-10 py-4 sm:py-5 rounded-2xl hover:bg-[#fff4f0] transition-all duration-300 font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_70px_-15px_rgba(255,107,53,0.4)] transform hover:-translate-y-1"
+                    className="group bg-white text-[#ff6b35] px-6 sm:px-8 2xl:px-10 py-3 sm:py-4 2xl:py-5 rounded-2xl hover:bg-[#fff4f0] transition-all duration-300 font-bold text-sm sm:text-base 2xl:text-lg flex items-center justify-center gap-3 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_70px_-15px_rgba(255,107,53,0.4)] transform hover:-translate-y-1"
                     aria-label="Solicitar cotización"
                   >
                     Solicitar Cotización 
-                    <FaArrowRight className="text-base sm:text-lg group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                    <FaArrowRight className="text-sm sm:text-base 2xl:text-lg group-hover:translate-x-1 transition-transform" aria-hidden="true" />
                   </button>
                   <button 
                     onClick={() => scrollToSection('servicios')} 
-                    className="border-2 border-white/90 bg-white/5 backdrop-blur-sm text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl hover:bg-white hover:text-[#ff6b35] hover:border-white transition-all duration-300 font-bold text-base sm:text-lg"
+                    className="border-2 border-white/90 bg-white/5 backdrop-blur-sm text-white px-6 sm:px-8 2xl:px-10 py-3 sm:py-4 2xl:py-5 rounded-2xl hover:bg-white hover:text-[#ff6b35] hover:border-white transition-all duration-300 font-bold text-sm sm:text-base 2xl:text-lg"
                     aria-label="Ver servicios disponibles"
                   >
                     Ver Servicios
@@ -66,7 +66,7 @@ export default function Hero({ scrollToSection }: HeroProps) {
 
               {/* Imagen Derecha - OPTIMIZADA PARA MÓVILES */}
               <div className="relative flex justify-center lg:justify-end">
-                <div className="relative w-full max-w-[500px] lg:max-w-[600px]">
+                <div className="relative w-full max-w-[460px] lg:max-w-[560px] xl:max-w-[520px] 2xl:max-w-[600px] pb-8 sm:pb-10 lg:pb-12 px-4 md:px-2 lg:pr-4 xl:px-0">
                   {/* Resplandor de fondo elegante */}
                   <div className="absolute -inset-6 lg:-inset-8 bg-gradient-to-br from-[#ffb84d]/25 via-[#ff8c5e]/15 to-transparent rounded-[2rem] blur-3xl"></div>
                   
@@ -75,7 +75,7 @@ export default function Hero({ scrollToSection }: HeroProps) {
                     <img 
                       src="/placeholder.svg" 
                       alt="Instalaciones de Lavandería del Cobre en Calama" 
-                      className="w-full h-[280px] sm:h-[320px] md:h-[380px] lg:h-[480px] xl:h-[520px] object-cover"
+                      className="w-full h-[260px] sm:h-[300px] md:h-[360px] lg:h-[420px] xl:h-[440px] 2xl:h-[520px] max-h-[40vh] sm:max-h-[45vh] lg:max-h-[50vh] xl:max-h-[55vh] 2xl:max-h-[60vh] object-cover"
                       loading="eager"
                     />
                     
@@ -88,8 +88,8 @@ export default function Hero({ scrollToSection }: HeroProps) {
                   </div>
 
                   {/* Decoración flotante sutil */}
-                  <div className="absolute -bottom-4 -right-4 w-24 h-24 lg:w-32 lg:h-32 bg-[#ffb84d]/20 rounded-full blur-2xl hidden md:block" aria-hidden="true"></div>
-                  <div className="absolute -top-4 -left-4 w-20 h-20 lg:w-24 lg:h-24 bg-white/15 rounded-full blur-xl hidden md:block" aria-hidden="true"></div>
+                  <div className="absolute -bottom-4 -right-4 w-20 h-20 lg:w-28 lg:h-28 xl:w-24 xl:h-24 2xl:w-32 2xl:h-32 bg-[#ffb84d]/20 rounded-full blur-2xl hidden md:block" aria-hidden="true"></div>
+                  <div className="absolute -top-4 -left-4 w-16 h-16 lg:w-20 lg:h-20 xl:w-20 xl:h-20 2xl:w-24 2xl:h-24 bg-white/15 rounded-full blur-xl hidden md:block" aria-hidden="true"></div>
                 </div>
               </div>
 
