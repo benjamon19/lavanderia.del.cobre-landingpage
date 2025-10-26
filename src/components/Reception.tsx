@@ -65,9 +65,9 @@ export default function Reception() {
 
           <div>
             <img 
-              src="/placeholder.svg" 
+              src="/images/reception.webp"
               alt="Recepción Lavandería del Cobre en Calama"
-              className="w-full h-96 object-cover rounded-2xl shadow-2xl" 
+              className="w-full h-96 object-cover object-top rounded-2xl shadow-2xl" 
               loading="lazy"
             />
           </div>

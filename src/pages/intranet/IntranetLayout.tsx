@@ -16,14 +16,14 @@ export default function IntranetLayout() {
   const [activeModule, setActiveModule] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Verificar autenticación desde localStorage al cargar
+  // Si el usuario es cliente, siempre mostrar mis pedidos
   useEffect(() => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      // El usuario está en localStorage, el contexto debería cargarlo
+    if (user?.role === 'client') {
+      setActiveModule('my-orders')
     }
-  }, [])
+  }, [user])
 
+  // IMPORTANTE: Todos los hooks deben estar ANTES de cualquier return condicional
   // Si no está autenticado, redirigir al home
   if (!isAuthenticated && !localStorage.getItem('user')) {
     return <Navigate to="/" replace />
@@ -36,13 +36,6 @@ export default function IntranetLayout() {
   const handleModuleChange = (module: string) => {
     setActiveModule(module)
   }
-
-  // Si el usuario es cliente, siempre mostrar mis pedidos
-  useEffect(() => {
-    if (user?.role === 'client') {
-      setActiveModule('my-orders')
-    }
-  }, [user])
 
   // Renderizar el módulo activo
   const renderModule = () => {

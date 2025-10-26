@@ -7,6 +7,8 @@ export default function Services() {
       icon: FaIndustry,
       title: 'Lavandería Industrial y Corporativa',
       description: 'Servicio especializado para la industria hotelera, minera y clientes corporativos.',
+      image: '/images/services/lavanderia-services-1.webp',
+      imagePosition: 'object-top', // Opciones: object-top, object-center, object-bottom
       features: [
         'Procesamiento de grandes volúmenes',
         'Tratamiento especializado por tipo de tejido',
@@ -18,6 +20,8 @@ export default function Services() {
       icon: FaTshirt,
       title: 'Lavandería Doméstica y Particular',
       description: 'Tratamiento experto para todo tipo de tejidos y prendas del hogar.',
+      image: '/images/services/lavanderia-services-2.webp',
+      imagePosition: 'object-top', // Opciones: object-top, object-center, object-bottom
       features: [
         'Lavado y planchado profesional',
         'Cuidado especializado de prendas delicadas',
@@ -29,6 +33,8 @@ export default function Services() {
       icon: FaTruck,
       title: 'Servicio de Retiro y Entrega',
       description: 'Valor agregado para tu comodidad y mejor atención al cliente.',
+      image: '/images/services/lavanderia-services-3.webp',
+      imagePosition: 'object-top', // Opciones: object-top, object-center, object-bottom
       features: [
         'Recogida programada en tu domicilio',
         'Entrega puntual y segura',
@@ -59,9 +65,9 @@ export default function Services() {
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
             >
               <img 
-                src="/placeholder.svg" 
+                src={service.image}
                 alt={`Servicio de ${service.title}`}
-                className="w-full h-48 object-cover" 
+                className={`w-full h-48 object-cover ${service.imagePosition}`}
                 loading="lazy"
               />
               <div className="p-6">

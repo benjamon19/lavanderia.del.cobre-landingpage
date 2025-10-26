@@ -6,17 +6,23 @@ export default function Machinery() {
     {
       icon: FaCog,
       title: 'Lavadoras Industriales',
-      description: 'Alta capacidad'
+      description: 'Alta capacidad',
+      image: '/images/machinery/machinery-1.webp',
+      imagePosition: 'object-top'
     },
     {
       icon: FaWind,
       title: 'Secadoras Eficientes',
-      description: 'Secado rápido'
+      description: 'Secado rápido',
+      image: '/images/machinery/machinery-2.webp',
+      imagePosition: 'object-top'
     },
     {
       icon: FaShower,
       title: 'Sistema de Planchado',
-      description: 'Acabado profesional'
+      description: 'Acabado profesional',
+      image: '/images/machinery/machinery-3.webp',
+      imagePosition: 'object-top'
     }
   ]
 
@@ -38,16 +44,16 @@ export default function Machinery() {
           {machines.map((machine, index) => (
             <article 
               key={index} 
-              className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
+              className="relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
             >
               <img 
-                src="/placeholder.svg" 
+                src={machine.image}
                 alt={machine.title}
-                className="w-full h-72 object-cover" 
+                className={`w-full h-72 object-cover ${machine.imagePosition} transition-transform duration-500 group-hover:scale-110`}
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a2e]/90 via-[#1a1a2e]/50 to-transparent rounded-2xl flex items-end p-6 group-hover:from-[#ff6b35]/90 group-hover:via-[#ff6b35]/50 transition-all duration-300">
-                <div className="text-white">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a2e]/90 via-[#1a1a2e]/50 to-transparent rounded-2xl flex items-end p-6 transition-all duration-300">
+                <div className="text-white transform transition-transform duration-300 group-hover:translate-y-0">
                   <div 
                     className="mb-3 w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm"
                     aria-hidden="true"

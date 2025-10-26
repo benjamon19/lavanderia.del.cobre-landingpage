@@ -1,5 +1,5 @@
 // src/context/AuthContext.tsx
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export type UserRole = 'admin' | 'worker' | 'client' | null
@@ -22,6 +22,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const navigate = useNavigate()
+
+  // Verificar si hay sesión guardada al iniciar - USANDO useEffect
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+  }, []) // Array vacío = solo se ejecuta al montar
 
   const login = (email: string, _password: string): boolean => {
     // Simulación de autenticación basada en el email
@@ -58,19 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user')
     navigate('/')
   }
-
-  // Verificar si hay sesión guardada al iniciar
-  const checkStoredUser = () => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-  }
-
-  // Llamar al montar el componente
-  useState(() => {
-    checkStoredUser()
-  })
 
   const value = {
     user,
