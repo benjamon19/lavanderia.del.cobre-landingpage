@@ -16,17 +16,20 @@ export default function IntranetNavbar({ onToggleSidebar }: IntranetNavbarProps)
         <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden p-2 rounded-lg hover:bg-[#fff4f0] text-[#1a1a2e] hover:text-[#ff6b35] transition-colors flex-shrink-0"
+            className="p-2 rounded-lg hover:bg-[#fff4f0] text-[#1a1a2e] hover:text-[#ff6b35] transition-colors flex-shrink-0"
             aria-label="Toggle menu"
           >
             <FaBars className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white font-bold text-base sm:text-lg">LC</span>
-            </div>
-            <div className="hidden sm:block min-w-0">
+          {/* Logo - Solo visible en desktop */}
+          <div className="hidden lg:flex items-center gap-2 sm:gap-3 min-w-0">
+            <img 
+              src="/logo.png" 
+              alt="Lavandería el Cobre" 
+              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 object-contain flex-shrink-0"
+            />
+            <div className="min-w-0">
               <h1 className="text-base lg:text-lg font-bold text-[#1a1a2e] truncate">Lavandería el Cobre</h1>
               <p className="text-xs text-[#6b6b7e]">Sistema Interno</p>
             </div>
@@ -35,12 +38,12 @@ export default function IntranetNavbar({ onToggleSidebar }: IntranetNavbarProps)
 
         {/* Usuario y logout */}
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-          <div className="hidden md:flex items-center gap-3 px-3 lg:px-4 py-2 bg-[#f8f9fa] rounded-xl">
-            <div className="w-8 h-8 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="hidden md:flex items-center gap-3 px-3 lg:px-4 py-2 bg-[#f8f9fa] rounded-xl border border-[#f0f0f5]">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
               <FaUser className="text-white text-sm" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#1a1a2e] truncate">{user?.name}</p>
+              <p className="text-sm font-semibold text-[#1a1a2e] truncate">{user?.name || user?.email?.split('@')[0]}</p>
               <p className="text-xs text-[#6b6b7e] capitalize truncate">{user?.role}</p>
             </div>
           </div>

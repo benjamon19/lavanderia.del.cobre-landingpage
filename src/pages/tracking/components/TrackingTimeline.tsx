@@ -6,7 +6,6 @@ import {
   FaCheckCircle,
   FaClock,
   FaCheck,
-  FaSync,
   FaInfoCircle
 } from 'react-icons/fa'
 import { GiIronCross } from 'react-icons/gi'
@@ -30,7 +29,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       id: 1,
       name: 'Recepcionado',
       description: 'Tu pedido ha sido recibido y registrado',
-      icon: <FaClipboardCheck className="text-2xl" />,
+      icon: <FaClipboardCheck className="text-base sm:text-xl md:text-2xl" />,
       timestamp: '20 Oct 2025, 14:30',
       status: currentStage >= 1 ? 'completed' : 'pending'
     },
@@ -38,7 +37,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       id: 2,
       name: 'Lavado',
       description: 'Tu ropa está siendo lavada con cuidado',
-      icon: <FaTshirt className="text-2xl" />,
+      icon: <FaTshirt className="text-base sm:text-xl md:text-2xl" />,
       timestamp: currentStage >= 2 ? '20 Oct 2025, 15:45' : 'Pendiente',
       status: currentStage > 2 ? 'completed' : currentStage === 2 ? 'in-progress' : 'pending'
     },
@@ -46,7 +45,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       id: 3,
       name: 'Secado',
       description: 'Proceso de secado en marcha',
-      icon: <FaWind className="text-2xl" />,
+      icon: <FaWind className="text-base sm:text-xl md:text-2xl" />,
       timestamp: currentStage >= 3 ? '20 Oct 2025, 17:15' : 'Pendiente',
       status: currentStage > 3 ? 'completed' : currentStage === 3 ? 'in-progress' : 'pending'
     },
@@ -54,7 +53,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       id: 4,
       name: 'Planchado',
       description: 'Tu ropa está siendo planchada',
-      icon: <GiIronCross className="text-2xl" />,
+      icon: <GiIronCross className="text-base sm:text-xl md:text-2xl" />,
       timestamp: currentStage >= 4 ? '20 Oct 2025, 18:30' : 'Pendiente',
       status: currentStage > 4 ? 'completed' : currentStage === 4 ? 'in-progress' : 'pending'
     },
@@ -62,7 +61,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       id: 5,
       name: 'Listo',
       description: 'Tu pedido está listo para retirar',
-      icon: <FaCheckCircle className="text-2xl" />,
+      icon: <FaCheckCircle className="text-base sm:text-xl md:text-2xl" />,
       timestamp: currentStage >= 5 ? '20 Oct 2025, 19:00' : 'Pendiente',
       status: currentStage >= 5 ? 'completed' : 'pending'
     }
@@ -80,7 +79,7 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
       case 'in-progress':
         return {
           container: 'bg-orange-50 border-[#ff6b35]',
-          icon: 'bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white animate-pulse',
+          icon: 'bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white',
           text: 'text-[#ff6b35]',
           line: 'bg-[#cfcfd8]'
         }
@@ -95,8 +94,8 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <h2 className="text-2xl font-bold text-[#1a1a2e] mb-8">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-md p-4 sm:p-6 md:p-8 border-2 border-[#f0f0f5]">
+      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#1a1a2e] mb-6 sm:mb-8">
         Línea de Tiempo del Proceso
       </h2>
       
@@ -106,41 +105,43 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
           const isLast = index === stages.length - 1
           
           return (
-            <div key={stage.id} className="relative pb-12 last:pb-0">
-              {/* Línea conectora */}
+            <div key={stage.id} className="relative pb-8 sm:pb-10 md:pb-12 last:pb-0">
+              {/* Línea conectora - Visible en TODOS los tamaños */}
               {!isLast && (
                 <div 
-                  className={`absolute left-8 top-16 w-1 h-full ${styles.line} transition-all duration-500`}
+                  className={`absolute left-6 sm:left-6 md:left-8 top-12 sm:top-14 md:top-16 w-0.5 sm:w-1 h-full ${styles.line}`}
                   style={{ height: 'calc(100% - 0rem)' }}
                 />
               )}
               
               {/* Card de etapa */}
-              <div className={`relative flex gap-6 border-2 ${styles.container} rounded-xl p-6 transition-all duration-300`}>
+              <div className={`relative flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 border-2 ${styles.container} rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6`}>
                 {/* Icono */}
-                <div className={`flex-shrink-0 w-16 h-16 rounded-full ${styles.icon} flex items-center justify-center shadow-lg transition-all duration-300`}>
+                <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full ${styles.icon} flex items-center justify-center shadow-lg`}>
                   {stage.icon}
                 </div>
                 
                 {/* Contenido */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className={`text-xl font-bold ${styles.text}`}>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-0 mb-2">
+                    <h3 className={`text-base sm:text-lg md:text-xl font-bold ${styles.text}`}>
                       {stage.name}
                     </h3>
-                    <span className={`text-sm font-medium ${styles.text} flex items-center gap-1.5`}>
-                      {stage.status === 'in-progress' && <FaClock className="text-sm" />}
-                      {stage.status === 'completed' && <FaCheck className="text-sm" />}
-                      {stage.timestamp}
+                    <span className={`text-xs sm:text-sm font-medium ${styles.text} flex items-center gap-1.5 whitespace-nowrap`}>
+                      {stage.status === 'in-progress' && <FaClock className="text-xs sm:text-sm" />}
+                      {stage.status === 'completed' && <FaCheck className="text-xs sm:text-sm" />}
+                      <span className="hidden sm:inline">{stage.timestamp}</span>
+                      <span className="sm:hidden">{stage.timestamp.split(',')[0]}</span>
                     </span>
                   </div>
-                  <p className="text-[#6b6b7e] leading-relaxed">
+                  <p className="text-xs sm:text-sm md:text-base text-[#6b6b7e] leading-relaxed">
                     {stage.description}
                   </p>
                   
                   {stage.status === 'in-progress' && (
-                    <div className="mt-4 inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-[#ff6b35] text-[#ff6b35] font-semibold text-sm">
-                      <FaSync className="animate-spin" /> En proceso ahora
+                    <div className="mt-3 sm:mt-4 inline-flex items-center gap-2 bg-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 border-[#ff6b35] text-[#ff6b35] font-semibold text-xs sm:text-sm">
+                      <div className="w-2 h-2 rounded-full bg-[#ff6b35] animate-pulse"></div>
+                      En proceso ahora
                     </div>
                   )}
                 </div>
@@ -150,14 +151,14 @@ export default function TrackingTimeline({ currentStage }: TrackingTimelineProps
         })}
       </div>
       
-      <div className="mt-8 p-6 bg-[#fff4f0] rounded-xl border border-[#ffded0]">
-        <div className="flex items-center gap-2 mb-2">
-          <FaInfoCircle className="text-[#ff6b35]" />
-          <h3 className="font-semibold text-[#1a1a2e]">
+      <div className="mt-6 sm:mt-8 p-4 sm:p-5 md:p-6 bg-[#fff4f0] rounded-lg sm:rounded-xl border-2 border-[#ffded0]">
+        <div className="flex items-center gap-2 mb-2 sm:mb-3">
+          <FaInfoCircle className="text-[#ff6b35] text-sm sm:text-base flex-shrink-0" />
+          <h3 className="font-semibold text-sm sm:text-base text-[#1a1a2e]">
             Información Importante
           </h3>
         </div>
-        <p className="text-sm text-[#2c2c3e]">
+        <p className="text-xs sm:text-sm text-[#2c2c3e]">
           El tiempo estimado de cada etapa puede variar según la carga de trabajo. 
           Te notificaremos cuando tu pedido esté listo para retirar.
         </p>

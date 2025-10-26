@@ -1,6 +1,6 @@
 // src/pages/intranet/components/Sidebar.tsx
 import type { ReactNode } from 'react'
-import { FaClipboardList, FaFileInvoice, FaBox, FaShoppingBag } from 'react-icons/fa'
+import { FaClipboardList, FaFileInvoice, FaBox, FaShoppingBag, FaTimes } from 'react-icons/fa'
 import { useAuth } from '../../../context/AuthContext'
 
 interface SidebarProps {
@@ -53,37 +53,58 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
     }
   ]
 
-  const filteredItems = menuItems.filter(item => 
+  const filteredItems = menuItems.filter(item =>
     user?.role && item.roles.includes(user.role)
   )
 
   const handleItemClick = (moduleId: string) => {
     onModuleChange(moduleId)
-    onClose() // Cerrar sidebar en móvil después de seleccionar
+    onClose()
   }
 
   return (
     <>
-      {/* Overlay para móvil */}
+      {/* Overlay difuminado */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-16 left-0 h-[calc(100vh-4rem)] w-64 bg-white shadow-xl z-30
+        fixed top-0 left-0 h-full w-64 sm:w-72 bg-white shadow-xl z-50
         transform transition-transform duration-300 ease-in-out overflow-y-auto
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:sticky lg:top-16
         border-r-2 border-[#f0f0f5]
       `}>
-
+        
+        {/* Header del sidebar con botón cerrar */}
+        <div className="h-16 bg-white border-b-2 border-[#f0f0f5] flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            {/* Logo y nombre - solo visible en móvil */}
+            <img 
+              src="/logo.png" 
+              alt="Lavandería el Cobre" 
+              className="w-10 h-10 object-contain sm:hidden"
+            />
+            <div>
+              <p className="text-xs text-[#6b6b7e]">Sistema Intranet</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-[#fff4f0] text-[#6b6b7e] hover:text-[#ff6b35] transition-colors"
+            aria-label="Cerrar menú"
+          >
+            <FaTimes className="text-xl" />
+          </button>
+        </div>
+        
         {/* Menú de navegación */}
         <nav className="p-4">
-          <p className="text-xs font-semibold text-[#6b6b7e] uppercase mb-4 px-4">
+          <p className="text-xs font-semibold text-[#6b6b7e] uppercase mb-4 px-4 tracking-wide">
             Menú Principal
           </p>
           <ul className="space-y-2">
@@ -110,8 +131,8 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
 
         {/* Footer del sidebar */}
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-[#fff4f0] border border-[#ffded0] rounded-xl p-4">
-            <p className="text-xs text-[#2c2c3e] font-medium">
+          <div className="bg-[#fff4f0] border-2 border-[#ffded0] rounded-xl p-4">
+            <p className="text-xs text-[#2c2c3e] font-semibold">
               Sistema Intranet v1.0
             </p>
             <p className="text-xs text-[#6b6b7e] mt-1">
