@@ -10,6 +10,7 @@ import TrackingModule from './modules/TrackingModule'
 import OrdersModule from './modules/OrdersModule'
 import ManagementModule from './modules/ManagementModule'
 import MyOrdersModule from './modules/MyOrdersModule'
+import UsersModule from './modules/UsersModule'
 
 export default function IntranetLayout() {
   const { user, isAuthenticated } = useAuth()
@@ -53,6 +54,9 @@ export default function IntranetLayout() {
       
       case 'management':
         return <ManagementModule />
+      
+      case 'users':
+        return <UsersModule />
       
       case 'my-orders':
         return <MyOrdersModule />

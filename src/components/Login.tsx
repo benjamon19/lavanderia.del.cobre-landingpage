@@ -1,36 +1,64 @@
 // src/components/Login.tsx
 import { useState } from 'react'
-import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaLightbulb } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
 interface LoginProps {
   isOpen: boolean
   onClose: () => void
+  onOpenRegister: () => void
 }
 
-export default function Login({ isOpen, onClose }: LoginProps) {
+export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const { login } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const { login, resetPassword } = useAuth()
 
   if (!isOpen) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
     
-    // Validar que el email tenga 1, 2 o 3 para los roles
-    const success = login(email, password)
-    
-    if (success) {
+    try {
+      await login(email, password)
       onClose()
       setEmail('')
       setPassword('')
-    } else {
-      setError('Email inválido. Usa un email con 1 (admin), 2 (trabajador) o 3 (cliente)')
+    } catch (error: any) {
+      setError(error.message || 'Error al iniciar sesión')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetMessage(null)
+    setLoading(true)
+
+    try {
+      await resetPassword(resetEmail)
+      setResetMessage({ 
+        type: 'success', 
+        text: `Hemos enviado un correo a ${resetEmail} con instrucciones para restablecer tu contraseña.` 
+      })
+      setResetEmail('')
+    } catch (error: any) {
+      setResetMessage({ 
+        type: 'error', 
+        text: error.message || 'Error al enviar el correo de recuperación' 
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -74,7 +102,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin1@elcobre.cl"
+                placeholder="usuario@ejemplo.com"
                 className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 md:py-3.5 border-2 border-[#cfcfd8] rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e] text-sm sm:text-base"
                 required
               />
@@ -120,6 +148,7 @@ export default function Login({ isOpen, onClose }: LoginProps) {
             </label>
             <button
               type="button"
+              onClick={() => setShowForgotPassword(true)}
               className="text-xs sm:text-sm text-[#ff6b35] hover:text-[#e85d2e] font-semibold transition-colors text-left sm:text-right"
             >
               ¿Olvidaste tu contraseña?
@@ -134,21 +163,106 @@ export default function Login({ isOpen, onClose }: LoginProps) {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3 sm:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-semibold text-base sm:text-lg transform hover:-translate-y-0.5"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3 sm:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-semibold text-base sm:text-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mb-3"
           >
-            Iniciar Sesión
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
 
-          <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg sm:rounded-xl">
-            <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-              <FaLightbulb className="text-blue-600 text-sm sm:text-base" />
-              <p className="text-[10px] sm:text-xs text-blue-800 font-semibold">Ejemplos de acceso:</p>
-            </div>
-            <p className="text-[10px] sm:text-xs text-blue-700">• Admin: admin1@elcobre.cl</p>
-            <p className="text-[10px] sm:text-xs text-blue-700">• Trabajador: trabajador2@elcobre.cl</p>
-            <p className="text-[10px] sm:text-xs text-blue-700">• Cliente: cliente3@gmail.com</p>
+          <div className="text-center">
+            <p className="text-sm text-[#6b6b7e] mb-2">¿No tienes cuenta?</p>
+            <button
+              type="button"
+              onClick={onOpenRegister}
+              className="text-[#ff6b35] hover:text-[#e85d2e] font-semibold transition-colors text-sm"
+            >
+              Regístrate como cliente
+            </button>
           </div>
         </form>
+
+        {/* Modal de recuperación de contraseña */}
+        {showForgotPassword && (
+          <div className="absolute inset-0 bg-white rounded-2xl sm:rounded-3xl z-10 p-5 sm:p-6 md:p-8">
+            <button
+              onClick={() => {
+                setShowForgotPassword(false)
+                setResetMessage(null)
+                setResetEmail('')
+              }}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-[#6b6b7e] hover:text-[#1a1a2e] transition-colors"
+              aria-label="Cerrar recuperación de contraseña"
+            >
+              <FaTimes className="text-xl sm:text-2xl" />
+            </button>
+
+            <div className="mt-8">
+              <h3 className="text-2xl font-bold text-[#1a1a2e] mb-2">Recuperar Contraseña</h3>
+              <p className="text-sm text-[#6b6b7e] mb-6">
+                Ingresa tu correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.
+              </p>
+
+              {resetMessage && (
+                <div className={`mb-4 p-3 rounded-xl flex items-start gap-2 ${
+                  resetMessage.type === 'success' 
+                    ? 'bg-green-50 border-2 border-green-200' 
+                    : 'bg-red-50 border-2 border-red-200'
+                }`}>
+                  {resetMessage.type === 'success' ? (
+                    <FaCheckCircle className="text-green-600 flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <FaExclamationTriangle className="text-red-600 flex-shrink-0 mt-0.5" />
+                  )}
+                  <p className={`text-sm font-medium ${
+                    resetMessage.type === 'success' ? 'text-green-700' : 'text-red-700'
+                  }`}>
+                    {resetMessage.text}
+                  </p>
+                </div>
+              )}
+
+              <form onSubmit={handleForgotPassword}>
+                <div className="mb-4">
+                  <label htmlFor="reset-email" className="block text-sm font-semibold text-[#1a1a2e] mb-2">
+                    Correo Electrónico
+                  </label>
+                  <div className="relative">
+                    <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e]" />
+                    <input
+                      type="email"
+                      id="reset-email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder="tu@correo.com"
+                      className="w-full pl-12 pr-4 py-3 border-2 border-[#cfcfd8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3 rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed mb-3"
+                >
+                  {loading ? 'Enviando...' : 'Enviar Correo de Recuperación'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(false)
+                    setResetMessage(null)
+                    setResetEmail('')
+                  }}
+                  className="w-full text-[#ff6b35] hover:text-[#e85d2e] font-semibold transition-colors text-sm"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

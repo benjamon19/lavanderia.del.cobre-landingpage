@@ -1,6 +1,6 @@
 // src/pages/intranet/components/Sidebar.tsx
 import type { ReactNode } from 'react'
-import { FaClipboardList, FaFileInvoice, FaBox, FaShoppingBag, FaTimes } from 'react-icons/fa'
+import { FaClipboardList, FaFileInvoice, FaBox, FaShoppingBag, FaTimes, FaUsers } from 'react-icons/fa'
 import { useAuth } from '../../../context/AuthContext'
 
 interface SidebarProps {
@@ -43,6 +43,12 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
       id: 'management',
       label: 'Gestión Interna',
       icon: <FaBox />,
+      roles: ['admin']
+    },
+    {
+      id: 'users',
+      label: 'Gestión de Usuarios',
+      icon: <FaUsers />,
       roles: ['admin']
     },
     {

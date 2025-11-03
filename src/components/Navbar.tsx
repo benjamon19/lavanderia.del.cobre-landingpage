@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { HiMenu, HiX } from 'react-icons/hi'
 import { FaUser, FaSearch } from 'react-icons/fa'
 import Login from './Login'
+import Register from './Register'
 import TrackingModal from './TrackingModal'
 
 interface NavbarProps {
@@ -12,6 +13,7 @@ interface NavbarProps {
 export default function Navbar({ scrollToSection }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [registerOpen, setRegisterOpen] = useState(false)
   const [trackingOpen, setTrackingOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -209,7 +211,24 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
       </nav>
 
       {/* Modal Login */}
-      <Login isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
+      <Login 
+        isOpen={loginOpen} 
+        onClose={() => setLoginOpen(false)} 
+        onOpenRegister={() => {
+          setLoginOpen(false)
+          setRegisterOpen(true)
+        }}
+      />
+
+      {/* Modal Registro */}
+      <Register
+        isOpen={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        onBackToLogin={() => {
+          setRegisterOpen(false)
+          setLoginOpen(true)
+        }}
+      />
       
       {/* Modal Seguimiento */}
       <TrackingModal isOpen={trackingOpen} onClose={() => setTrackingOpen(false)} />
