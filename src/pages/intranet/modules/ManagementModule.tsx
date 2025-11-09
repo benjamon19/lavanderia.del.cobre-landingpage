@@ -15,20 +15,20 @@ export default function ManagementModule() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('equipo7')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo7'
-              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-gray-200 shadow-sm'
           }`}
         >
           Equipo 7
         </button>
         <button
           onClick={() => setActiveTab('equipo4')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo4'
-              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+              ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-gray-200 shadow-sm'
           }`}
         >
           Equipo 4

@@ -24,20 +24,20 @@ export default function OrdersModule() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => handleTabChange('equipo5')}
-          className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo5'
-              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-[#fff4f0] border-2 border-[#f0f0f5]'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-[#fff4f0] border-[#f0f0f5] shadow-sm'
           }`}
         >
           Equipo 5
         </button>
         <button
           onClick={() => handleTabChange('equipo2')}
-          className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo2'
-              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-[#fff4f0] border-2 border-[#f0f0f5]'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-[#fff4f0] border-[#f0f0f5] shadow-sm'
           }`}
         >
           Equipo 2

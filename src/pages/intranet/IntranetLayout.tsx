@@ -1,5 +1,5 @@
 // src/pages/intranet/IntranetLayout.tsx
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import IntranetNavbar from './components/IntranetNavbar'
@@ -17,6 +17,7 @@ export default function IntranetLayout() {
   const { user, isAuthenticated, loading } = useAuth()
   const [searchParams] = useSearchParams()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const previousModuleRef = useRef<string>('')
   
   // Obtener módulo de los parámetros de URL o de la ruta
   const modulo = searchParams.get('modulo') || window.location.pathname.split('/').pop() || 'dashboard'
@@ -25,6 +26,16 @@ export default function IntranetLayout() {
 
   // Determinar el módulo activo
   const activeModule = user?.role === 'client' ? 'my-orders' : modulo
+
+  // Prevenir scroll automático al cambiar de módulo
+  useEffect(() => {
+    if (previousModuleRef.current && previousModuleRef.current !== activeModule) {
+      // Mantener la posición del scroll actual al cambiar de módulo
+      const currentScrollY = window.scrollY
+      window.scrollTo(0, currentScrollY)
+    }
+    previousModuleRef.current = activeModule
+  }, [activeModule])
 
   // Mostrar pantalla de carga mientras se verifica la autenticación
   if (loading) {
@@ -98,9 +109,14 @@ export default function IntranetLayout() {
           onClose={() => setSidebarOpen(false)}
         />
         
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0 min-h-[calc(100vh-4rem)]">
           <div className="max-w-7xl mx-auto">
-            {renderModule()}
+            <div 
+              key={activeModule} 
+              className="animate-fadeIn"
+            >
+              {renderModule()}
+            </div>
           </div>
         </main>
       </div>

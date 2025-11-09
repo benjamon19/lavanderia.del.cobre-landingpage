@@ -15,3 +15,8 @@ createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+// Desactivar scroll restoration automático del navegador
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual'
+}

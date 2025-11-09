@@ -15,20 +15,20 @@ export default function TrackingModule() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setActiveTab('equipo1')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo1'
-              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-gray-200 shadow-sm'
           }`}
         >
           Equipo 1
         </button>
         <button
           onClick={() => setActiveTab('equipo3')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 shadow-lg ${
             activeTab === 'equipo3'
-              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
-              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white border-transparent'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-gray-200 shadow-sm'
           }`}
         >
           Equipo 3

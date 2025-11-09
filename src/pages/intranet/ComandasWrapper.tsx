@@ -35,9 +35,11 @@ export default function ComandasWrapper() {
           onClose={() => setSidebarOpen(false)}
         />
         
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0 min-h-[calc(100vh-4rem)]">
           <div className="max-w-7xl mx-auto">
-            <Outlet />
+            <div className="animate-fadeIn">
+              <Outlet />
+            </div>
           </div>
         </main>
       </div>
