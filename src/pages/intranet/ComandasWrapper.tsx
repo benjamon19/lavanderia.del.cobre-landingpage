@@ -31,7 +31,6 @@ export default function ComandasWrapper() {
       <div className="flex pt-16">
         <Sidebar 
           activeModule="orders" 
-          onModuleChange={() => {}}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
