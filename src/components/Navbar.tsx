@@ -1,7 +1,9 @@
 // src/components/Navbar.tsx
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { HiMenu, HiX } from 'react-icons/hi'
 import { FaUser, FaSearch } from 'react-icons/fa'
+import { useAuth } from '../context/AuthContext'
 import Login from './Login'
 import Register from './Register'
 import TrackingModal from './TrackingModal'
@@ -11,6 +13,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ scrollToSection }: NavbarProps) {
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
@@ -27,6 +31,17 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
 
   const handleScroll = (id: string) => {
     scrollToSection(id)
+    setMenuOpen(false)
+  }
+
+  const handleLoginClick = () => {
+    if (isAuthenticated) {
+      // Si ya está autenticado, ir directamente a la intranet
+      navigate('/intranet/dashboard')
+    } else {
+      // Si no, abrir modal de login
+      setLoginOpen(true)
+    }
     setMenuOpen(false)
   }
 
@@ -105,11 +120,11 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                 <FaSearch className="text-xs xl:text-xs 2xl:text-sm" aria-hidden="true" /> Seguimiento
               </button>
               <button
-                onClick={() => setLoginOpen(true)}
+                onClick={handleLoginClick}
                 className="flex items-center gap-2 text-[#2c2c3e] hover:text-[#ff6b35] font-semibold transition-all text-sm xl:text-sm 2xl:text-base border-2 border-[#cfcfd8] hover:border-[#ff6b35] px-4 xl:px-4 2xl:px-5 py-2 xl:py-2 2xl:py-2.5 rounded-xl"
                 aria-label="Iniciar sesión"
               >
-                <FaUser className="text-xs xl:text-xs 2xl:text-sm" aria-hidden="true" /> Login
+                <FaUser className="text-xs xl:text-xs 2xl:text-sm" aria-hidden="true" /> Iniciar Sesión
               </button>
             </div>
 
@@ -134,7 +149,7 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                 <FaSearch className="text-xs" aria-hidden="true" />
               </button>
               <button
-                onClick={() => setLoginOpen(true)}
+                onClick={handleLoginClick}
                 className="flex items-center gap-2 text-[#2c2c3e] hover:text-[#ff6b35] font-semibold transition-all text-sm border-2 border-[#cfcfd8] hover:border-[#ff6b35] px-3 py-1.5 rounded-xl"
                 aria-label="Iniciar sesión"
               >
@@ -195,15 +210,12 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
                 <FaSearch className="text-xs" aria-hidden="true" /> Seguimiento
               </button>
               <button
-                onClick={() => {
-                  setLoginOpen(true)
-                  setMenuOpen(false)
-                }}
+                onClick={handleLoginClick}
                 className="w-full text-left px-4 py-2.5 mt-2 border-2 border-[#cfcfd8] hover:border-[#ff6b35] text-[#2c2c3e] hover:text-[#ff6b35] bg-white/40 hover:bg-white/70 font-semibold rounded-lg flex items-center gap-2 transition-all text-sm"
                 role="menuitem"
                 aria-label="Iniciar sesión"
               >
-                <FaUser className="text-xs" aria-hidden="true" /> Login
+                <FaUser className="text-xs" aria-hidden="true" /> Iniciar Sesión
               </button>
             </div>
           </div>

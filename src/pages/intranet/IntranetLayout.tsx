@@ -1,6 +1,6 @@
 // src/pages/intranet/IntranetLayout.tsx
-import { useState, useEffect } from 'react'
-import { Navigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import IntranetNavbar from './components/IntranetNavbar'
 import Sidebar from './components/Sidebar'
@@ -11,22 +11,35 @@ import OrdersModule from './modules/OrdersModule'
 import ManagementModule from './modules/ManagementModule'
 import MyOrdersModule from './modules/MyOrdersModule'
 import UsersModule from './modules/UsersModule'
+import { ListaComandasModule, RegistroComandaModule, DetalleComandaModule } from './modules/comandas'
 
 export default function IntranetLayout() {
-  const { user, isAuthenticated } = useAuth()
-  const [activeModule, setActiveModule] = useState('dashboard')
+  const { user, isAuthenticated, loading } = useAuth()
+  const [searchParams] = useSearchParams()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  
+  // Obtener módulo de los parámetros de URL o de la ruta
+  const modulo = searchParams.get('modulo') || window.location.pathname.split('/').pop() || 'dashboard'
+  const view = searchParams.get('view')
+  const id = searchParams.get('id')
 
-  // Si el usuario es cliente, siempre mostrar mis pedidos
-  useEffect(() => {
-    if (user?.role === 'client') {
-      setActiveModule('my-orders')
-    }
-  }, [user])
+  // Determinar el módulo activo
+  const activeModule = user?.role === 'client' ? 'my-orders' : modulo
 
-  // IMPORTANTE: Todos los hooks deben estar ANTES de cualquier return condicional
+  // Mostrar pantalla de carga mientras se verifica la autenticación
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#f8f9fa] to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#ff6b35] mx-auto mb-4"></div>
+          <p className="text-[#6b6b7e] font-medium">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Si no está autenticado, redirigir al home
-  if (!isAuthenticated && !localStorage.getItem('user')) {
+  if (!isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
@@ -34,19 +47,26 @@ export default function IntranetLayout() {
     setSidebarOpen(!sidebarOpen)
   }
 
-  const handleModuleChange = (module: string) => {
-    setActiveModule(module)
-  }
-
   // Renderizar el módulo activo
   const renderModule = () => {
+    // Para comandas2 (sub-rutas del sistema de comandas), verificar si hay una vista específica
+    if (activeModule === 'comandas2') {
+      if (view === 'registro') {
+        return <RegistroComandaModule />
+      } else if (view === 'detalle' && id) {
+        return <DetalleComandaModule comandaId={id} />
+      } else {
+        return <ListaComandasModule />
+      }
+    }
+    
     switch (activeModule) {
       case 'dashboard':
         if (user?.role === 'admin') return <AdminDashboard />
         if (user?.role === 'worker') return <WorkerDashboard />
         return <AdminDashboard />
       
-      case 'tracking':
+      case 'seguimiento':
         return <TrackingModule />
       
       case 'orders':
@@ -73,8 +93,7 @@ export default function IntranetLayout() {
       
       <div className="flex pt-16">
         <Sidebar 
-          activeModule={activeModule} 
-          onModuleChange={handleModuleChange}
+          activeModule={activeModule}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

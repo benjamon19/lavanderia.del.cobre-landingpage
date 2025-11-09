@@ -1,11 +1,11 @@
 // src/pages/intranet/components/Sidebar.tsx
 import type { ReactNode } from 'react'
 import { FaClipboardList, FaFileInvoice, FaBox, FaShoppingBag, FaTimes, FaUsers } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
 
 interface SidebarProps {
   activeModule: string
-  onModuleChange: (module: string) => void
   isOpen: boolean
   onClose: () => void
 }
@@ -17,8 +17,9 @@ interface MenuItem {
   roles: Array<'admin' | 'worker' | 'client'>
 }
 
-export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps) {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const menuItems: MenuItem[] = [
     {
@@ -28,7 +29,7 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
       roles: ['admin', 'worker']
     },
     {
-      id: 'tracking',
+      id: 'seguimiento',
       label: 'Seguimiento de Órdenes',
       icon: <FaClipboardList />,
       roles: ['admin', 'worker']
@@ -64,7 +65,7 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
   )
 
   const handleItemClick = (moduleId: string) => {
-    onModuleChange(moduleId)
+    navigate(`/intranet/${moduleId}`)
     onClose()
   }
 
@@ -139,7 +140,7 @@ export default function Sidebar({ activeModule, onModuleChange, isOpen, onClose 
         <div className="absolute bottom-4 left-4 right-4">
           <div className="bg-[#fff4f0] border-2 border-[#ffded0] rounded-xl p-4">
             <p className="text-xs text-[#2c2c3e] font-semibold">
-              Sistema Intranet v1.0
+              Sistema Intranet
             </p>
             <p className="text-xs text-[#6b6b7e] mt-1">
               Lavandería el Cobre

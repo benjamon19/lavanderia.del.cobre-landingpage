@@ -29,10 +29,11 @@ export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
     setLoading(true)
     
     try {
-      await login(email, password)
+      await login(email, password, rememberMe)
       onClose()
       setEmail('')
       setPassword('')
+      setRememberMe(false) // Resetear el checkbox después del login
     } catch (error: any) {
       setError(error.message || 'Error al iniciar sesión')
     } finally {

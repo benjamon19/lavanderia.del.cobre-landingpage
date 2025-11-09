@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 
@@ -17,7 +17,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   resendVerification: () => Promise<void>
@@ -91,8 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe()
   }, [])
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     try {
+      // Configurar persistencia según el checkbox "Recuérdame"
+      // LOCAL: mantiene la sesión incluso después de cerrar el navegador
+      // SESSION: la sesión expira cuando se cierra la pestaña/ventana del navegador
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence)
       // Autenticar con Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const firebaseUser = userCredential.user

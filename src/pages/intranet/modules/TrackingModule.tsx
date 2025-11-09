@@ -1,7 +1,9 @@
 // src/pages/intranet/modules/TrackingModule.tsx
-import { FaRocket, FaCheckCircle } from 'react-icons/fa'
+import { useState } from 'react'
 
 export default function TrackingModule() {
+  const [activeTab, setActiveTab] = useState<'equipo1' | 'equipo3'>('equipo1')
+
   return (
     <div>
       <div className="mb-8">
@@ -9,27 +11,53 @@ export default function TrackingModule() {
         <p className="text-[#6b6b7e]">Sistema completo de seguimiento y gestión de órdenes</p>
       </div>
 
-      <div className="bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white rounded-2xl shadow-xl p-12 text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <FaRocket className="text-5xl" />
-            <h2 className="text-4xl font-bold">Módulo en Desarrollo</h2>
+      {/* Pestañas */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setActiveTab('equipo1')}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTab === 'equipo1'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+          }`}
+        >
+          Equipo 1
+        </button>
+        <button
+          onClick={() => setActiveTab('equipo3')}
+          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+            activeTab === 'equipo3'
+              ? 'bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white shadow-lg'
+              : 'bg-white text-[#6b6b7e] hover:bg-gray-50 border-2 border-gray-200'
+          }`}
+        >
+          Equipo 3
+        </button>
+      </div>
+
+      {/* Contenido de pestañas */}
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        {activeTab === 'equipo1' && (
+          <div>
+            <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">Seguimiento - Equipo 1</h2>
+            <p className="text-[#6b6b7e] mb-6">Gestión de órdenes de trabajo para el Equipo 1</p>
+            {/* Aquí irá el contenido específico del Equipo 1 */}
+            <div className="text-center py-12 text-[#6b6b7e]">
+              <p>Contenido del Equipo 1 en desarrollo</p>
+            </div>
           </div>
-          <p className="text-lg text-[#ffe8e0] mb-6">
-            Este módulo permitirá gestionar todas las órdenes de trabajo en tiempo real, 
-            con funcionalidades de asignación, seguimiento y reportes detallados.
-          </p>
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 text-left">
-            <p className="font-semibold mb-3">Funcionalidades planificadas:</p>
-            <ul className="space-y-2 text-[#ffe8e0]">
-              <li className="flex items-center gap-2"><FaCheckCircle /> Vista de todas las órdenes activas</li>
-              <li className="flex items-center gap-2"><FaCheckCircle /> Asignación de tareas a trabajadores</li>
-              <li className="flex items-center gap-2"><FaCheckCircle /> Actualización de estados en tiempo real</li>
-              <li className="flex items-center gap-2"><FaCheckCircle /> Historial completo de cambios</li>
-              <li className="flex items-center gap-2"><FaCheckCircle /> Alertas y notificaciones automáticas</li>
-            </ul>
+        )}
+        
+        {activeTab === 'equipo3' && (
+          <div>
+            <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">Seguimiento - Equipo 3</h2>
+            <p className="text-[#6b6b7e] mb-6">Gestión de órdenes de trabajo para el Equipo 3</p>
+            {/* Aquí irá el contenido específico del Equipo 3 */}
+            <div className="text-center py-12 text-[#6b6b7e]">
+              <p>Contenido del Equipo 3 en desarrollo</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

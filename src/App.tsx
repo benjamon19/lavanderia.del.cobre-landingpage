@@ -9,7 +9,7 @@ function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/tracking/:code" element={<TrackingPage />} />
-      <Route path="/intranet/dashboard" element={<IntranetLayout />} />
+      <Route path="/intranet/*" element={<IntranetLayout />} />
     </Routes>
   )
 }
