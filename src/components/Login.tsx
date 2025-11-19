@@ -145,7 +145,7 @@ export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-4 h-4 text-[#ff6b35] border-[#cfcfd8] rounded focus:ring-[#ff6b35] cursor-pointer"
               />
-              <span className="ml-2 text-xs sm:text-sm text-[#2c2c3e] font-medium">Recordarme</span>
+              <span className="ml-2 text-xs sm:text-sm text-[#2c2c3e] font-medium">Recordar usuario</span>
             </label>
             <button
               type="button"

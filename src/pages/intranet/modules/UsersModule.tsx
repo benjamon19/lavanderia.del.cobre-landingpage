@@ -3,13 +3,16 @@ import { useState } from 'react'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../../../config/firebase'
-import { FaUser, FaEnvelope, FaLock, FaUserTag, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { FaUser, FaEnvelope, FaLock, FaUserTag, FaCheckCircle, FaExclamationTriangle, FaPhone, FaIdCard } from 'react-icons/fa'
+import { validateAndFormatRUT, formatChileanPhone } from '../../../utils/chileanValidators'
 
 interface UserFormData {
   correo: string
   contraseña: string
   confirmarContraseña: string
   nombre: string
+  rut: string
+  telefono: string
   rol: 'administrador' | 'cliente' | 'operario'
   activo: boolean
 }
@@ -20,6 +23,8 @@ export default function UsersModule() {
     contraseña: '',
     confirmarContraseña: '',
     nombre: '',
+    rut: '',
+    telefono: '',
     rol: 'cliente',
     activo: true
   })
@@ -27,6 +32,10 @@ export default function UsersModule() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+  const [rutError, setRutError] = useState<string>('')
+  const [telefonoError, setTelefonoError] = useState<string>('')
+  const [rutFormatted, setRutFormatted] = useState<string>('')
+  const [telefonoFormatted, setTelefonoFormatted] = useState<string>('')
 
   // Validar requisitos de contraseña
   const validatePassword = (password: string): string[] => {
@@ -54,6 +63,48 @@ export default function UsersModule() {
     setPasswordErrors(validatePassword(newPassword))
   }
 
+  const handleRUTChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rutValue = e.target.value
+    // Permitir solo números y K, sin puntos ni guiones
+    const cleanValue = rutValue.replace(/[^0-9Kk]/g, '')
+    setFormData({ ...formData, rut: cleanValue })
+    
+    if (cleanValue.length >= 7) {
+      const validation = validateAndFormatRUT(cleanValue)
+      if (validation.isValid) {
+        setRutFormatted(validation.formatted)
+        setRutError('')
+      } else {
+        setRutFormatted(validation.formatted)
+        setRutError(validation.error || 'RUT inválido')
+      }
+    } else {
+      setRutFormatted(cleanValue)
+      setRutError('')
+    }
+  }
+
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phoneValue = e.target.value
+    // Permitir solo números
+    const cleanValue = phoneValue.replace(/[^0-9]/g, '')
+    setFormData({ ...formData, telefono: cleanValue })
+    
+    if (cleanValue.length > 0) {
+      const validation = formatChileanPhone(cleanValue)
+      if (validation.isValid) {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError('')
+      } else {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError(validation.error || 'Teléfono inválido')
+      }
+    } else {
+      setTelefonoFormatted('')
+      setTelefonoError('')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage(null)
@@ -67,6 +118,28 @@ export default function UsersModule() {
     const passwordValidation = validatePassword(formData.contraseña)
     if (passwordValidation.length > 0) {
       setMessage({ type: 'error', text: 'La contraseña no cumple con los requisitos mínimos' })
+      return
+    }
+
+    // Validar RUT
+    if (!formData.rut || formData.rut.length < 8) {
+      setMessage({ type: 'error', text: 'Por favor ingresa un RUT válido' })
+      return
+    }
+    const rutValidation = validateAndFormatRUT(formData.rut)
+    if (!rutValidation.isValid) {
+      setMessage({ type: 'error', text: rutValidation.error || 'El RUT ingresado no es válido' })
+      return
+    }
+
+    // Validar teléfono
+    if (!formData.telefono || formData.telefono.length < 8) {
+      setMessage({ type: 'error', text: 'Por favor ingresa un teléfono válido (8 dígitos)' })
+      return
+    }
+    const telefonoValidation = formatChileanPhone(formData.telefono)
+    if (!telefonoValidation.isValid) {
+      setMessage({ type: 'error', text: telefonoValidation.error || 'El teléfono ingresado no es válido' })
       return
     }
 
@@ -90,6 +163,8 @@ export default function UsersModule() {
         uid,
         correo: formData.correo,
         nombre: formData.nombre,
+        rut: rutValidation.clean,
+        telefono: telefonoValidation.formatted,
         rol: formData.rol,
         activo: formData.activo,
         fecha_creacion: serverTimestamp(),
@@ -107,10 +182,16 @@ export default function UsersModule() {
         contraseña: '',
         confirmarContraseña: '',
         nombre: '',
+        rut: '',
+        telefono: '',
         rol: 'cliente',
         activo: true
       })
       setPasswordErrors([])
+      setRutError('')
+      setTelefonoError('')
+      setRutFormatted('')
+      setTelefonoFormatted('')
 
     } catch (error: any) {
       console.error('Error al crear usuario:', error)
@@ -202,6 +283,60 @@ export default function UsersModule() {
               </div>
             </div>
 
+            {/* RUT */}
+            <div>
+              <label className="block text-sm font-semibold text-[#2c2c3e] mb-2">
+                RUT
+              </label>
+              <div className="relative">
+                <FaIdCard className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e]" />
+                <input
+                  type="text"
+                  value={formData.rut}
+                  onChange={handleRUTChange}
+                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${
+                    rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
+                  }`}
+                  placeholder="123456789 (sin puntos ni guión)"
+                  required
+                />
+              </div>
+              {rutFormatted && !rutError && (
+                <p className="mt-1 text-xs text-green-600">RUT válido: {rutFormatted}</p>
+              )}
+              {rutError && (
+                <p className="mt-1 text-xs text-red-600">{rutError}</p>
+              )}
+              <p className="mt-1 text-xs text-[#6b6b7e]">Ingresa el RUT sin puntos ni guión (ej: 123456789)</p>
+            </div>
+
+            {/* Teléfono */}
+            <div>
+              <label className="block text-sm font-semibold text-[#2c2c3e] mb-2">
+                Teléfono
+              </label>
+              <div className="relative">
+                <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e]" />
+                <input
+                  type="text"
+                  value={formData.telefono}
+                  onChange={handleTelefonoChange}
+                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${
+                    telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
+                  }`}
+                  placeholder="12345678 (8 dígitos)"
+                  required
+                />
+              </div>
+              {telefonoFormatted && !telefonoError && (
+                <p className="mt-1 text-xs text-green-600">Teléfono válido: {telefonoFormatted}</p>
+              )}
+              {telefonoError && (
+                <p className="mt-1 text-xs text-red-600">{telefonoError}</p>
+              )}
+              <p className="mt-1 text-xs text-[#6b6b7e]">Ingresa 8 dígitos (se formateará como +569...)</p>
+            </div>
+
             {/* Contraseña */}
             <div>
               <label className="block text-sm font-semibold text-[#2c2c3e] mb-2">
@@ -288,7 +423,7 @@ export default function UsersModule() {
             {/* Botón de envío */}
             <button
               type="submit"
-              disabled={loading || passwordErrors.length > 0}
+              disabled={loading || passwordErrors.length > 0 || !!rutError || !!telefonoError || !rutFormatted || !telefonoFormatted}
               className="w-full py-4 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creando usuario...' : 'Crear Usuario'}

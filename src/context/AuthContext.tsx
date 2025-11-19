@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
+import { setCookie, deleteCookie } from '../utils/cookies'
 
 export type UserRole = 'admin' | 'worker' | 'client' | null
 
@@ -139,6 +140,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(mappedUser)
       localStorage.setItem('user', JSON.stringify(mappedUser))
       
+      // Si el usuario marcó "Recordarme", guardar información en cookies
+      if (rememberMe) {
+        setCookie('rememberUser', 'true', 30) // 30 días
+        setCookie('userEmail', email, 30)
+      } else {
+        // Si no marcó recordar, eliminar cookies existentes
+        deleteCookie('rememberUser')
+        deleteCookie('userEmail')
+      }
+      
       // Redirigir al dashboard
       navigate('/intranet/dashboard')
     } catch (error: any) {
@@ -170,6 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signOut(auth)
       setUser(null)
       localStorage.removeItem('user')
+      // Eliminar cookies al cerrar sesión
+      deleteCookie('rememberUser')
+      deleteCookie('userEmail')
       navigate('/')
     } catch (error) {
       console.error('Error al cerrar sesión:', error)

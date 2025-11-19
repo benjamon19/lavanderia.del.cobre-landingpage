@@ -1,5 +1,8 @@
 // src/pages/HomePage.tsx
 import { lazy, Suspense, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { getCookie } from '../utils/cookies'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 
@@ -10,6 +13,9 @@ const Contact = lazy(() => import('../components/Contact'))
 const Footer = lazy(() => import('../components/Footer'))
 
 export default function HomePage() {
+  const navigate = useNavigate()
+  const { isAuthenticated, loading } = useAuth()
+  
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
@@ -17,6 +23,18 @@ export default function HomePage() {
       window.history.pushState(null, '', `#${id}`)
     }
   }
+
+  // Verificar si hay cookie de "recordar usuario" y redirigir automáticamente
+  useEffect(() => {
+    // Esperar a que termine la carga de autenticación
+    if (!loading) {
+      const rememberUser = getCookie('rememberUser')
+      // Si hay cookie de recordar usuario y el usuario está autenticado, redirigir
+      if (rememberUser === 'true' && isAuthenticated) {
+        navigate('/intranet/dashboard', { replace: true })
+      }
+    }
+  }, [loading, isAuthenticated, navigate])
 
   // Scroll spy - detecta qué sección está visible y actualiza la URL
   useEffect(() => {

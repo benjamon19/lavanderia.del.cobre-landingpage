@@ -1,9 +1,10 @@
 // src/components/Register.tsx
 import { useState } from 'react'
-import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle, FaPhone, FaIdCard } from 'react-icons/fa'
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
+import { validateAndFormatRUT, formatChileanPhone } from '../utils/chileanValidators'
 
 interface RegisterProps {
   isOpen: boolean
@@ -18,12 +19,18 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     nombre: '',
     correo: '',
     contraseña: '',
-    confirmarContraseña: ''
+    confirmarContraseña: '',
+    rut: '',
+    telefono: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+  const [rutError, setRutError] = useState<string>('')
+  const [telefonoError, setTelefonoError] = useState<string>('')
+  const [rutFormatted, setRutFormatted] = useState<string>('')
+  const [telefonoFormatted, setTelefonoFormatted] = useState<string>('')
 
   if (!isOpen) return null
 
@@ -53,6 +60,48 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     setPasswordErrors(validatePassword(newPassword))
   }
 
+  const handleRUTChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rutValue = e.target.value
+    // Permitir solo números y K, sin puntos ni guiones
+    const cleanValue = rutValue.replace(/[^0-9Kk]/g, '')
+    setFormData({ ...formData, rut: cleanValue })
+    
+    if (cleanValue.length >= 7) {
+      const validation = validateAndFormatRUT(cleanValue)
+      if (validation.isValid) {
+        setRutFormatted(validation.formatted)
+        setRutError('')
+      } else {
+        setRutFormatted(validation.formatted)
+        setRutError(validation.error || 'RUT inválido')
+      }
+    } else {
+      setRutFormatted(cleanValue)
+      setRutError('')
+    }
+  }
+
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phoneValue = e.target.value
+    // Permitir solo números
+    const cleanValue = phoneValue.replace(/[^0-9]/g, '')
+    setFormData({ ...formData, telefono: cleanValue })
+    
+    if (cleanValue.length > 0) {
+      const validation = formatChileanPhone(cleanValue)
+      if (validation.isValid) {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError('')
+      } else {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError(validation.error || 'Teléfono inválido')
+      }
+    } else {
+      setTelefonoFormatted('')
+      setTelefonoError('')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -67,6 +116,28 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     const passwordValidation = validatePassword(formData.contraseña)
     if (passwordValidation.length > 0) {
       setError('La contraseña no cumple con los requisitos mínimos de seguridad')
+      return
+    }
+
+    // Validar RUT
+    if (!formData.rut || formData.rut.length < 8) {
+      setError('Por favor ingresa un RUT válido')
+      return
+    }
+    const rutValidation = validateAndFormatRUT(formData.rut)
+    if (!rutValidation.isValid) {
+      setError(rutValidation.error || 'El RUT ingresado no es válido')
+      return
+    }
+
+    // Validar teléfono
+    if (!formData.telefono || formData.telefono.length < 8) {
+      setError('Por favor ingresa un teléfono válido (8 dígitos)')
+      return
+    }
+    const telefonoValidation = formatChileanPhone(formData.telefono)
+    if (!telefonoValidation.isValid) {
+      setError(telefonoValidation.error || 'El teléfono ingresado no es válido')
       return
     }
 
@@ -90,6 +161,8 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
         uid,
         correo: formData.correo,
         nombre: formData.nombre,
+        rut: rutValidation.clean,
+        telefono: telefonoValidation.formatted,
         rol: 'cliente',
         activo: true,
         fecha_creacion: serverTimestamp(),
@@ -101,9 +174,15 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
         nombre: '',
         correo: '',
         contraseña: '',
-        confirmarContraseña: ''
+        confirmarContraseña: '',
+        rut: '',
+        telefono: ''
       })
       setPasswordErrors([])
+      setRutError('')
+      setTelefonoError('')
+      setRutFormatted('')
+      setTelefonoFormatted('')
 
     } catch (error: any) {
       console.error('Error al registrar usuario:', error)
@@ -213,6 +292,62 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
                 </div>
               </div>
 
+              {/* RUT */}
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="register-rut" className="block text-xs sm:text-sm font-semibold text-[#1a1a2e] mb-1.5 sm:mb-2">
+                  RUT
+                </label>
+                <div className="relative">
+                  <FaIdCard className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e] text-sm sm:text-base" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="register-rut"
+                    value={formData.rut}
+                    onChange={handleRUTChange}
+                    placeholder="123456789 (sin puntos ni guión)"
+                    className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e] text-sm sm:text-base ${
+                      rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-[#cfcfd8]'
+                    }`}
+                    required
+                  />
+                </div>
+                {rutFormatted && !rutError && (
+                  <p className="mt-1 text-xs text-green-600">RUT válido: {rutFormatted}</p>
+                )}
+                {rutError && (
+                  <p className="mt-1 text-xs text-red-600">{rutError}</p>
+                )}
+                <p className="mt-1 text-xs text-[#6b6b7e]">Ingresa tu RUT sin puntos ni guión (ej: 123456789)</p>
+              </div>
+
+              {/* Teléfono */}
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="register-telefono" className="block text-xs sm:text-sm font-semibold text-[#1a1a2e] mb-1.5 sm:mb-2">
+                  Teléfono
+                </label>
+                <div className="relative">
+                  <FaPhone className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e] text-sm sm:text-base" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="register-telefono"
+                    value={formData.telefono}
+                    onChange={handleTelefonoChange}
+                    placeholder="12345678 (8 dígitos)"
+                    className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e] text-sm sm:text-base ${
+                      telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-[#cfcfd8]'
+                    }`}
+                    required
+                  />
+                </div>
+                {telefonoFormatted && !telefonoError && (
+                  <p className="mt-1 text-xs text-green-600">Teléfono válido: {telefonoFormatted}</p>
+                )}
+                {telefonoError && (
+                  <p className="mt-1 text-xs text-red-600">{telefonoError}</p>
+                )}
+                <p className="mt-1 text-xs text-[#6b6b7e]">Ingresa 8 dígitos (se formateará como +569...)</p>
+              </div>
+
               {/* Contraseña */}
               <div className="mb-4 sm:mb-5">
                 <label htmlFor="register-password" className="block text-xs sm:text-sm font-semibold text-[#1a1a2e] mb-1.5 sm:mb-2">
@@ -289,7 +424,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
 
               <button
                 type="submit"
-                disabled={loading || passwordErrors.length > 0}
+                disabled={loading || passwordErrors.length > 0 || !!rutError || !!telefonoError || !rutFormatted || !telefonoFormatted}
                 className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3 sm:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-semibold text-base sm:text-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mb-3"
               >
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}

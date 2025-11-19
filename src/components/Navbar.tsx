@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { HiMenu, HiX } from 'react-icons/hi'
 import { FaUser, FaSearch } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
+import { getCookie } from '../utils/cookies'
 import Login from './Login'
 import Register from './Register'
 import TrackingModal from './TrackingModal'
@@ -39,8 +40,17 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
       // Si ya está autenticado, ir directamente a la intranet
       navigate('/intranet/dashboard')
     } else {
-      // Si no, abrir modal de login
-      setLoginOpen(true)
+      // Verificar si hay cookie de "recordar usuario"
+      const rememberUser = getCookie('rememberUser')
+      if (rememberUser === 'true') {
+        // Si hay cookie de recordar usuario, verificar si hay sesión activa
+        // Firebase ya maneja la persistencia, así que si hay sesión, el AuthContext la detectará
+        // Por ahora, simplemente redirigir a la intranet (Firebase verificará la sesión)
+        navigate('/intranet/dashboard')
+      } else {
+        // Si no hay cookie, abrir modal de login
+        setLoginOpen(true)
+      }
     }
     setMenuOpen(false)
   }
