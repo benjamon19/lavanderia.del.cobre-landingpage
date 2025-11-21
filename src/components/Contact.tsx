@@ -1,7 +1,7 @@
 // src/components/Contact.tsx
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import emailjs from '@emailjs/browser'
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaPaperPlane } from 'react-icons/fa'
+import { FaPaperPlane } from 'react-icons/fa'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -27,29 +27,6 @@ export default function Contact() {
   const emailPublicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
   const fallbackTargetEmail = 'geometry257@gmail.com'
   const contactReceiverEmail = import.meta.env.VITE_CONTACT_RECEIVER_EMAIL || fallbackTargetEmail
-
-  const contactDetails = [
-    {
-      icon: FaPhone,
-      title: 'Teléfono',
-      content: '+56 9 XXXX XXXX'
-    },
-    {
-      icon: FaEnvelope,
-      title: 'Email',
-      content: 'contacto@lavanderiacobre.cl'
-    },
-    {
-      icon: FaMapMarkerAlt,
-      title: 'Dirección',
-      content: 'Av. Balmaceda 1276, Calama, Antofagasta'
-    },
-    {
-      icon: FaClock,
-      title: 'Horario',
-      content: 'Lun-Vie: 8:00-20:00 | Sáb: 9:00-14:00'
-    }
-  ]
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target
@@ -107,8 +84,8 @@ export default function Contact() {
   }
 
   return (
-    <section 
-      id="contacto" 
+    <section
+      id="contacto"
       className="py-20 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white"
       aria-labelledby="contact-heading"
     >
@@ -120,15 +97,24 @@ export default function Contact() {
           <p className="text-xl md:text-2xl text-[#ffe8e0]">Envíanos un mensaje</p>
         </header>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-5 gap-12 items-center">
+          {/* Imagen */}
+          <div className="hidden lg:block lg:col-span-2">
+            <img
+              src="/images/contact/contacto-principal.png"
+              alt="Contacto Lavandería el Cobre"
+              className="w-full h-auto object-contain rounded-2xl"
+            />
+          </div>
+
           {/* Formulario */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border-2 border-white/20">
+          <div className="lg:col-span-3 bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="block text-base font-semibold mb-2">
                   Nombre
                 </label>
-                <input 
+                <input
                   type="text"
                   id="name"
                   name="name"
@@ -144,7 +130,7 @@ export default function Contact() {
                 <label htmlFor="email" className="block text-base font-semibold mb-2">
                   Email
                 </label>
-                <input 
+                <input
                   type="email"
                   id="email"
                   name="email"
@@ -160,7 +146,7 @@ export default function Contact() {
                 <label htmlFor="phone" className="block text-base font-semibold mb-2">
                   Teléfono
                 </label>
-                <input 
+                <input
                   type="tel"
                   id="phone"
                   name="phone"
@@ -175,7 +161,7 @@ export default function Contact() {
                 <label htmlFor="service" className="block text-base font-semibold mb-2">
                   Servicio
                 </label>
-                <select 
+                <select
                   id="service"
                   name="service"
                   value={formData.service}
@@ -208,7 +194,7 @@ export default function Contact() {
                 <label htmlFor="message" className="block text-base font-semibold mb-2">
                   Mensaje
                 </label>
-                <textarea 
+                <textarea
                   id="message"
                   name="message"
                   rows={4}
@@ -232,7 +218,7 @@ export default function Contact() {
                 </p>
               )}
 
-              <button 
+              <button
                 type="submit"
                 className="w-full bg-white text-[#ff6b35] px-8 py-4 rounded-xl hover:bg-[#fff4f0] transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={status.loading}
@@ -241,29 +227,6 @@ export default function Contact() {
                 {status.loading ? 'Enviando...' : 'Enviar Mensaje'} <FaPaperPlane aria-hidden="true" />
               </button>
             </form>
-          </div>
-
-          {/* Info */}
-          <div className="space-y-6">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border-2 border-white/20">
-              <h3 className="text-2xl md:text-3xl font-bold mb-6">Información</h3>
-              <div className="space-y-4">
-                {contactDetails.map((detail, index) => (
-                  <div key={index} className="flex items-center">
-                    <div 
-                      className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 backdrop-blur-sm"
-                      aria-hidden="true"
-                    >
-                      <detail.icon className="text-2xl" />
-                    </div>
-                    <div className="ml-4">
-                      <p className="font-semibold text-lg">{detail.title}</p>
-                      <p className="text-[#ffe8e0] text-base">{detail.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>

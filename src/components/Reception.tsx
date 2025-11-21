@@ -11,23 +11,23 @@ export default function Reception() {
     {
       icon: FaMapMarkerAlt,
       title: 'Ubicación',
-      lines: ['Av. Balmaceda 1276', 'Calama, Región de Antofagasta']
+      lines: ['Avenida Balmaceda N°1276', 'Calama, Región de Antofagasta']
     },
     {
       icon: FaPhone,
       title: 'Teléfono',
-      lines: ['+56 9 XXXX XXXX']
+      lines: ['+56 9 59594156']
     },
     {
       icon: FaEnvelope,
       title: 'Email',
-      lines: ['contacto@lavanderiacobre.cl']
+      lines: ['ventas@lavanderiaelcobrespa.com']
     }
   ]
 
   return (
-    <section 
-      id="recepcion" 
+    <section
+      id="recepcion"
       className="py-20 bg-[#fff4f0]"
       aria-labelledby="reception-heading"
     >
@@ -37,14 +37,11 @@ export default function Reception() {
             <h2 id="reception-heading" className="text-4xl md:text-5xl font-bold text-[#1a1a2e] mb-6">
               Recepción
             </h2>
-            <p className="text-xl md:text-2xl text-[#2c2c3e] mb-8">
-              Atención personalizada en nuestras instalaciones.
-            </p>
-            
+
             <div className="space-y-6">
               {contactInfo.map((info, index) => (
                 <div key={index} className="flex items-start">
-                  <div 
+                  <div
                     className="w-14 h-14 bg-[#ffe8e0] rounded-xl flex items-center justify-center flex-shrink-0"
                     aria-hidden="true"
                   >
@@ -64,10 +61,10 @@ export default function Reception() {
           </div>
 
           <div>
-            <img 
+            <img
               src="/images/reception.webp"
               alt="Recepción Lavandería del Cobre en Calama"
-              className="w-full h-96 object-cover object-top rounded-2xl shadow-2xl" 
+              className="w-full h-96 object-cover object-top rounded-2xl shadow-2xl"
               loading="lazy"
             />
           </div>
