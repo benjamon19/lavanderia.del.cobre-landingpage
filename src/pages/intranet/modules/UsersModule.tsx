@@ -1,8 +1,11 @@
 // src/pages/intranet/modules/UsersModule.tsx
 import { useState } from 'react'
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+// Importamos utilidades para manejar apps secundarias
+import { initializeApp, deleteApp, type FirebaseApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { auth, db } from '../../../config/firebase'
+// Importamos la db normal y la configuración para crear la app temporal
+import { db, firebaseConfig } from '../../../config/firebase'
 import { FaUser, FaEnvelope, FaLock, FaUserTag, FaCheckCircle, FaExclamationTriangle, FaPhone, FaIdCard } from 'react-icons/fa'
 import { validateAndFormatRUT, formatChileanPhone } from '../../../utils/chileanValidators'
 
@@ -109,7 +112,7 @@ export default function UsersModule() {
     e.preventDefault()
     setMessage(null)
 
-    // Validaciones
+    // Validaciones básicas
     if (formData.contraseña !== formData.confirmarContraseña) {
       setMessage({ type: 'error', text: 'Las contraseñas no coinciden' })
       return
@@ -144,21 +147,29 @@ export default function UsersModule() {
     }
 
     setLoading(true)
+    
+    // Variable para la app secundaria
+    let secondaryApp: FirebaseApp | null = null;
 
     try {
-      // Crear usuario en Firebase Authentication
+      // 1. Crear instancia secundaria de Firebase para no cerrar sesión del admin
+      secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+      const secondaryAuth = getAuth(secondaryApp);
+
+      // 2. Crear usuario en Firebase Authentication usando la instancia secundaria
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        secondaryAuth,
         formData.correo,
         formData.contraseña
       )
 
       const uid = userCredential.user.uid
 
-      // Enviar correo de verificación
+      // 3. Enviar correo de verificación
       await sendEmailVerification(userCredential.user)
 
-      // Guardar datos del usuario en Firestore (sin la contraseña)
+      // 4. Guardar datos del usuario en Firestore usando la instancia PRINCIPAL (db)
+      // Esto es importante porque 'db' tiene la sesión del admin autenticado con permisos de escritura
       await setDoc(doc(db, 'usuarios', uid), {
         uid,
         correo: formData.correo,
@@ -170,6 +181,9 @@ export default function UsersModule() {
         fecha_creacion: serverTimestamp(),
         ultimo_acceso: serverTimestamp()
       })
+
+      // 5. Cerrar sesión en la app secundaria
+      await signOut(secondaryAuth);
 
       setMessage({
         type: 'success',
@@ -204,10 +218,16 @@ export default function UsersModule() {
         errorMessage = 'Correo electrónico inválido'
       } else if (error.code === 'auth/weak-password') {
         errorMessage = 'La contraseña es demasiado débil'
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Error de conexión. Verifica tu internet.'
       }
 
       setMessage({ type: 'error', text: errorMessage })
     } finally {
+      // 6. Limpiar la app secundaria de la memoria
+      if (secondaryApp) {
+        await deleteApp(secondaryApp).catch(console.error);
+      }
       setLoading(false)
     }
   }
