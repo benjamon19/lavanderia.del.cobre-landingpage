@@ -6,6 +6,7 @@ import IntranetNavbar from './components/IntranetNavbar'
 import Sidebar from './components/Sidebar'
 import AdminDashboard from './modules/AdminDashboard'
 import WorkerDashboard from './modules/WorkerDashboard'
+import RecepcionistaDashboard from './modules/RecepcionistaDashboard'
 import TrackingModule from './modules/TrackingModule'
 import OrdersModule from './modules/OrdersModule'
 import ManagementModule from './modules/ManagementModule'
@@ -25,7 +26,7 @@ export default function IntranetLayout() {
   const id = searchParams.get('id')
 
   // Determinar el módulo activo
-  const activeModule = user?.role === 'client' ? 'my-orders' : modulo
+  const activeModule = user?.role === 'Cliente' ? 'my-orders' : modulo
 
   // Prevenir scroll automático al cambiar de módulo
   useEffect(() => {
@@ -73,8 +74,9 @@ export default function IntranetLayout() {
     
     switch (activeModule) {
       case 'dashboard':
-        if (user?.role === 'admin') return <AdminDashboard />
-        if (user?.role === 'worker') return <WorkerDashboard />
+        if (user?.role === 'Administrador') return <AdminDashboard />
+        if (user?.role === 'Trabajador') return <WorkerDashboard />
+        if (user?.role === 'Recepcionista') return <RecepcionistaDashboard />
         return <AdminDashboard />
       
       case 'seguimiento':
@@ -93,7 +95,7 @@ export default function IntranetLayout() {
         return <MyOrdersModule />
       
       default:
-        if (user?.role === 'client') return <MyOrdersModule />
+        if (user?.role === 'Cliente') return <MyOrdersModule />
         return <AdminDashboard />
     }
   }

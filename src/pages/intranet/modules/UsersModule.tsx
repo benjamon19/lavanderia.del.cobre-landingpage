@@ -13,7 +13,7 @@ interface UserFormData {
   nombre: string
   rut: string
   telefono: string
-  rol: 'administrador' | 'cliente' | 'operario'
+  rol: 'administrador' | 'cliente' | 'operario' | 'recepcionista'
   activo: boolean
 }
 
@@ -28,7 +28,7 @@ export default function UsersModule() {
     rol: 'cliente',
     activo: true
   })
-  
+
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
@@ -40,7 +40,7 @@ export default function UsersModule() {
   // Validar requisitos de contraseña
   const validatePassword = (password: string): string[] => {
     const errors: string[] = []
-    
+
     if (password.length < 8) {
       errors.push('Mínimo 8 caracteres')
     }
@@ -53,7 +53,7 @@ export default function UsersModule() {
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
       errors.push('Al menos un signo especial')
     }
-    
+
     return errors
   }
 
@@ -68,7 +68,7 @@ export default function UsersModule() {
     // Permitir solo números y K, sin puntos ni guiones
     const cleanValue = rutValue.replace(/[^0-9Kk]/g, '')
     setFormData({ ...formData, rut: cleanValue })
-    
+
     if (cleanValue.length >= 7) {
       const validation = validateAndFormatRUT(cleanValue)
       if (validation.isValid) {
@@ -89,7 +89,7 @@ export default function UsersModule() {
     // Permitir solo números
     const cleanValue = phoneValue.replace(/[^0-9]/g, '')
     setFormData({ ...formData, telefono: cleanValue })
-    
+
     if (cleanValue.length > 0) {
       const validation = formatChileanPhone(cleanValue)
       if (validation.isValid) {
@@ -171,9 +171,9 @@ export default function UsersModule() {
         ultimo_acceso: serverTimestamp()
       })
 
-      setMessage({ 
-        type: 'success', 
-        text: `Usuario ${formData.nombre} creado exitosamente. Se ha enviado un correo de verificación a ${formData.correo}` 
+      setMessage({
+        type: 'success',
+        text: `Usuario ${formData.nombre} creado exitosamente. Se ha enviado un correo de verificación a ${formData.correo}`
       })
 
       // Limpiar formulario
@@ -195,7 +195,7 @@ export default function UsersModule() {
 
     } catch (error: any) {
       console.error('Error al crear usuario:', error)
-      
+
       // Mensajes de error más amigables
       let errorMessage = 'Error al crear usuario'
       if (error.code === 'auth/email-already-in-use') {
@@ -205,7 +205,7 @@ export default function UsersModule() {
       } else if (error.code === 'auth/weak-password') {
         errorMessage = 'La contraseña es demasiado débil'
       }
-      
+
       setMessage({ type: 'error', text: errorMessage })
     } finally {
       setLoading(false)
@@ -232,11 +232,10 @@ export default function UsersModule() {
           </div>
 
           {message && (
-            <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${
-              message.type === 'success' 
-                ? 'bg-green-50 border-2 border-green-200 text-green-700' 
+            <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${message.type === 'success'
+                ? 'bg-green-50 border-2 border-green-200 text-green-700'
                 : 'bg-red-50 border-2 border-red-200 text-red-700'
-            }`}>
+              }`}>
               {message.type === 'success' ? (
                 <FaCheckCircle className="text-xl flex-shrink-0 mt-0.5" />
               ) : (
@@ -294,9 +293,8 @@ export default function UsersModule() {
                   type="text"
                   value={formData.rut}
                   onChange={handleRUTChange}
-                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${
-                    rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
-                  }`}
+                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
+                    }`}
                   placeholder="123456789 (sin puntos ni guión)"
                   required
                 />
@@ -321,9 +319,8 @@ export default function UsersModule() {
                   type="text"
                   value={formData.telefono}
                   onChange={handleTelefonoChange}
-                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${
-                    telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
-                  }`}
+                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
+                    }`}
                   placeholder="12345678 (8 dígitos)"
                   required
                 />
@@ -399,9 +396,10 @@ export default function UsersModule() {
                   className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#ff6b35] focus:outline-none transition-colors appearance-none bg-white"
                   required
                 >
-                  <option value="cliente">Cliente</option>
-                  <option value="operario">Operario</option>
                   <option value="administrador">Administrador</option>
+                  <option value="recepcionista">Recepcionista</option>
+                  <option value="operario">Operario</option>
+                  <option value="cliente">Cliente</option>
                 </select>
               </div>
             </div>

@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 import { setCookie, deleteCookie } from '../utils/cookies'
 
-export type UserRole = 'admin' | 'worker' | 'client' | null
+export type UserRole = 'Administrador' | 'Trabajador' | 'Cliente' | 'Recepcionista' | null
 
 interface User {
   uid: string
@@ -22,6 +22,8 @@ interface AuthContextType {
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   resendVerification: () => Promise<void>
+  refreshUser: () => Promise<void>
+  setIsCreatingUser: (value: boolean) => void
   isAuthenticated: boolean
   loading: boolean
 }
@@ -32,13 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const [isCreatingUser, setIsCreatingUser] = useState(false)
 
   // Mapear roles de Firestore a roles del sistema
   const mapRole = (firestoreRole: string): UserRole => {
     const roleMap: Record<string, UserRole> = {
-      'administrador': 'admin',
-      'operario': 'worker',
-      'cliente': 'client'
+      'administrador': 'Administrador',
+      'operario': 'Trabajador',
+      'cliente': 'Cliente',
+      'recepcionista': 'Recepcionista'
     }
     return roleMap[firestoreRole] || null
   }
@@ -46,6 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Verificar sesión de Firebase al iniciar
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Si estamos creando un usuario, ignorar cambios temporales de autenticación
+      if (isCreatingUser) {
+        return
+      }
+
       if (firebaseUser) {
         try {
           // Obtener datos del usuario desde Firestore
@@ -90,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [isCreatingUser])
 
   const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     try {
@@ -220,12 +229,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const currentUser = auth.currentUser
+      if (!currentUser) {
+        setUser(null)
+        localStorage.removeItem('user')
+        return
+      }
+
+      // Obtener datos del usuario desde Firestore
+      const userDoc = await getDoc(doc(db, 'usuarios', currentUser.uid))
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data()
+        
+        // Verificar si el usuario está activo
+        if (userData.activo) {
+          const mappedUser: User = {
+            uid: currentUser.uid,
+            email: currentUser.email || '',
+            role: mapRole(userData.rol),
+            name: userData.nombre,
+            activo: userData.activo
+          }
+          setUser(mappedUser)
+          localStorage.setItem('user', JSON.stringify(mappedUser))
+        } else {
+          // Usuario inactivo
+          await signOut(auth)
+          setUser(null)
+          localStorage.removeItem('user')
+        }
+      } else {
+        // Usuario no existe en Firestore
+        await signOut(auth)
+        setUser(null)
+        localStorage.removeItem('user')
+      }
+    } catch (error) {
+      console.error('Error refrescando usuario:', error)
+    }
+  }
+
   const value = {
     user,
     login,
     logout,
     resetPassword,
     resendVerification,
+    refreshUser,
+    setIsCreatingUser,
     isAuthenticated: !!user,
     loading
   }

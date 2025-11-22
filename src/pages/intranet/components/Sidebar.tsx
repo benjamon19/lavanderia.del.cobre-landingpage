@@ -14,7 +14,7 @@ interface MenuItem {
   id: string
   label: string
   icon: ReactNode
-  roles: Array<'admin' | 'worker' | 'client'>
+  roles: Array<'Administrador' | 'Trabajador' | 'Cliente' | 'Recepcionista'>
 }
 
 export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps) {
@@ -26,37 +26,37 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'dashboard',
       label: 'Dashboard',
       icon: <FaClipboardList />,
-      roles: ['admin', 'worker']
+      roles: ['Administrador', 'Trabajador', 'Recepcionista']
     },
     {
       id: 'seguimiento',
       label: 'Seguimiento de Órdenes',
       icon: <FaClipboardList />,
-      roles: ['admin', 'worker']
+      roles: ['Administrador', 'Trabajador', 'Recepcionista']
     },
     {
       id: 'orders',
       label: 'Sistema de Comandas',
       icon: <FaFileInvoice />,
-      roles: ['admin', 'worker']
+      roles: ['Administrador', 'Trabajador', 'Recepcionista']
     },
     {
       id: 'management',
       label: 'Gestión Interna',
       icon: <FaBox />,
-      roles: ['admin']
+      roles: ['Administrador']
     },
     {
       id: 'users',
       label: 'Gestión de Usuarios',
       icon: <FaUsers />,
-      roles: ['admin']
+      roles: ['Administrador']
     },
     {
       id: 'my-orders',
       label: 'Mis Pedidos',
       icon: <FaShoppingBag />,
-      roles: ['client']
+      roles: ['Cliente']
     }
   ]
 
