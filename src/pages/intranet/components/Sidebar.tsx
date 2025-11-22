@@ -89,7 +89,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       roles: ['Administrador', 'Trabajador'], 
       subItems: [
         { label: 'Equipo 4', url: 'https://lavanderia-cobre-spa.vercel.app' }, 
-        { label: 'Equipo 7', url: 'https://deploy-equipo-7.vercel.app' }
+        { label: 'Equipo 7', url: 'https://lavanderia-el-cobre-iota.vercel.app/' }
       ]
     },
     {
