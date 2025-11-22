@@ -82,7 +82,7 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
         return event ? formatDate(event.fechaCambio) : 'Pendiente'
     }
 
-    const stages = [
+    const stages: Stage[] = [
         {
             id: 1,
             estado: 'pendiente',
@@ -184,43 +184,50 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
     }
 
     return (
-        {/* Línea conectora horizontal */ }
-                                {
-        !isLast && (
-            <div
-                className={`absolute top-6 sm:top-7 left-1/2 w-full h-0.5 sm:h-1 ${styles.line} -z-0`}
-            />
-        )
-    }
+        <div className="w-full py-4 sm:py-8 overflow-x-auto">
+            <div className="min-w-[320px] px-2">
+                <div className="flex justify-between items-start relative">
+                    {stages.map((stage, index) => {
+                        const isLast = index === stages.length - 1
+                        const styles = getStatusStyles(stage.status)
 
-    {/* Icono */ }
-    <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full ${styles.icon} flex items-center justify-center shadow-md z-10`}>
-        {stage.icon}
-    </div>
+                        return (
+                            <div key={stage.id} className="relative flex flex-col items-center flex-1">
+                                {/* Línea conectora horizontal */}
+                                {!isLast && (
+                                    <div
+                                        className={`absolute top-6 sm:top-7 left-1/2 w-full h-0.5 sm:h-1 ${styles.line} -z-0`}
+                                    />
+                                )}
 
-    {/* Nombre de la etapa */ }
-    <div className="mt-2 sm:mt-3 text-center w-full px-1">
-        <h3 className={`text-[10px] sm:text-xs font-bold ${styles.text} leading-tight mb-1`}>
-            {stage.name}
-        </h3>
-        {stage.status === 'in-progress' && (
-            <div className="inline-flex items-center gap-1 bg-white px-2 py-1 rounded border border-[#ff6b35] text-[#ff6b35] font-semibold text-[9px] sm:text-xs">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b35] animate-pulse"></div>
-                Actual
-            </div>
-        )}
-        {stage.status === 'completed' && (
-            <div className="flex items-center justify-center text-green-600 text-[9px] sm:text-xs">
-                <FaCheck className="text-[8px] sm:text-[10px]" />
-            </div>
-        )}
-    </div>
-                            </div >
+                                {/* Icono */}
+                                <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 ${styles.container} ${styles.icon} flex items-center justify-center shadow-md z-10`}>
+                                    {stage.icon}
+                                </div>
+
+                                {/* Nombre de la etapa */}
+                                <div className="mt-2 sm:mt-3 text-center w-full px-1">
+                                    <h3 className={`text-[10px] sm:text-xs font-bold ${styles.text} leading-tight mb-1`}>
+                                        {stage.name}
+                                    </h3>
+                                    {stage.status === 'in-progress' && (
+                                        <div className="inline-flex items-center gap-1 bg-white px-2 py-1 rounded border border-[#ff6b35] text-[#ff6b35] font-semibold text-[9px] sm:text-xs">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b35] animate-pulse"></div>
+                                            Actual
+                                        </div>
+                                    )}
+                                    {stage.status === 'completed' && (
+                                        <div className="flex items-center justify-center text-green-600 text-[9px] sm:text-xs">
+                                            <FaCheck className="text-[8px] sm:text-[10px]" />
+                                        </div>
+                                    )}
+                                    <p className="text-[9px] text-gray-400 mt-1 hidden sm:block">{stage.timestamp}</p>
+                                </div>
+                            </div>
                         )
-})}
-                </div >
-            </div >
-
-        </div >
+                    })}
+                </div>
+            </div>
+        </div>
     )
 }
