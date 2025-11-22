@@ -14,14 +14,14 @@ export default function IntranetNavbar({ onToggleSidebar }: IntranetNavbarProps)
       <div className="flex items-center justify-between h-16 px-3 sm:px-4">
         {/* Logo y botón menú */}
         <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-          <button
-            onClick={onToggleSidebar}
-            className="p-2 rounded-lg hover:bg-[#fff4f0] text-[#1a1a2e] hover:text-[#ff6b35] transition-colors flex-shrink-0"
-            aria-label="Toggle menu"
-          >
-            <FaBars className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          
+                  <button
+                    onClick={onToggleSidebar}
+                    // AGREGADO: lg:hidden para ocultar el botón en escritorio
+                    className="p-2 rounded-lg hover:bg-[#fff4f0] text-[#1a1a2e] hover:text-[#ff6b35] transition-colors flex-shrink-0 lg:hidden"
+                    aria-label="Toggle menu"
+                  >
+                    <FaBars className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
           {/* Logo - Solo visible en desktop */}
           <div className="hidden lg:flex items-center gap-2 sm:gap-3 min-w-0">
             <img 
