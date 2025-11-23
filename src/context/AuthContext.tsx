@@ -59,10 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           // Obtener datos del usuario desde Firestore
           const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid))
-          
+
           if (userDoc.exists()) {
             const userData = userDoc.data()
-            
+
             // Verificar si el usuario está activo
             if (userData.activo) {
               const mappedUser: User = {
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Obtener datos del usuario desde Firestore
       const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid))
-      
+
       if (!userDoc.exists()) {
         await signOut(auth)
         throw new Error('Tu cuenta no está configurada correctamente. Contacta al administrador.')
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(mappedUser)
       localStorage.setItem('user', JSON.stringify(mappedUser))
-      
+
       // Si el usuario marcó "Recordarme", guardar información en cookies
       if (rememberMe) {
         setCookie('rememberUser', 'true', 30) // 30 días
@@ -158,12 +158,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         deleteCookie('rememberUser')
         deleteCookie('userEmail')
       }
-      
+
       // Redirigir al dashboard
       navigate('/intranet/dashboard')
     } catch (error: any) {
       console.error('Error en login:', error)
-      
+
       // Lanzar error con mensaje más amigable
       if (error.code === 'auth/user-not-found') {
         throw new Error('No encontramos una cuenta con este correo electrónico.')
@@ -204,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sendPasswordResetEmail(auth, email)
     } catch (error: any) {
       console.error('Error al enviar correo de recuperación:', error)
-      
+
       if (error.code === 'auth/user-not-found') {
         throw new Error('No existe una cuenta con este correo electrónico.')
       } else if (error.code === 'auth/invalid-email') {
@@ -240,10 +240,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Obtener datos del usuario desde Firestore
       const userDoc = await getDoc(doc(db, 'usuarios', currentUser.uid))
-      
+
       if (userDoc.exists()) {
         const userData = userDoc.data()
-        
+
         // Verificar si el usuario está activo
         if (userData.activo) {
           const mappedUser: User = {

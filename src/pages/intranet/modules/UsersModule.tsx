@@ -147,7 +147,7 @@ export default function UsersModule() {
     }
 
     setLoading(true)
-    
+
     // Variable para la app secundaria
     let secondaryApp: FirebaseApp | null = null;
 
@@ -253,8 +253,8 @@ export default function UsersModule() {
 
           {message && (
             <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${message.type === 'success'
-                ? 'bg-green-50 border-2 border-green-200 text-green-700'
-                : 'bg-red-50 border-2 border-red-200 text-red-700'
+              ? 'bg-green-50 border-2 border-green-200 text-green-700'
+              : 'bg-red-50 border-2 border-red-200 text-red-700'
               }`}>
               {message.type === 'success' ? (
                 <FaCheckCircle className="text-xl flex-shrink-0 mt-0.5" />
@@ -263,6 +263,7 @@ export default function UsersModule() {
               )}
               <p className="font-medium">{message.text}</p>
             </div>
+
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -313,7 +314,8 @@ export default function UsersModule() {
                   type="text"
                   value={formData.rut}
                   onChange={handleRUTChange}
-                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
+                  className={` w-full  p l-12  p r-4  p y-3 bord e r-2 round e d-xl focu s:outli n e-none focu s:ri n g-2 focu s:ri n g-[#ff6b35] focu s:bord e r-transparent transiti o n-all 
+    ${rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
                     }`}
                   placeholder="123456789 (sin puntos ni guión)"
                   required
@@ -339,7 +341,8 @@ export default function UsersModule() {
                   type="text"
                   value={formData.telefono}
                   onChange={handleTelefonoChange}
-                  className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all ${telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
+                  className={` w-full  p l-12  p r-4  p y-3 bord e r-2 round e d-xl focu s:outli n e-none focu s:ri n g-2 focu s:ri n g-[#ff6b35] focu s:bord e r-transparent transiti o n-all 
+    ${telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
                     }`}
                   placeholder="12345678 (8 dígitos)"
                   required
@@ -449,6 +452,6 @@ export default function UsersModule() {
           </form>
         </div>
       </div>
-    </div>
+    </div >
   )
 }

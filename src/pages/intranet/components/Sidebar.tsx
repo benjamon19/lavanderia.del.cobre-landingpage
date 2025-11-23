@@ -67,7 +67,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       icon: <FaClipboardList />,
       roles: ['Administrador', 'Trabajador', 'Recepcionista'],
       subItems: [
-        { label: 'Equipo 1', url: 'https://deploy-equipo-1.vercel.app' },
+        { label: 'Equipo 1', url: 'https://seguimiento-ot-kohl.vercel.app/' },
         { label: 'Equipo 3', url: 'https://lavanderia-el-cobre-spa.vercel.app/' }
       ]
     },

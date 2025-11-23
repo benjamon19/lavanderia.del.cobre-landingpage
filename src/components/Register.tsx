@@ -30,7 +30,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
   // Validar requisitos de contraseña
   const validatePassword = (password: string): string[] => {
     const errors: string[] = []
-    
+
     if (password.length < 8) {
       errors.push('Mínimo 8 caracteres')
     }
@@ -43,7 +43,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
       errors.push('Al menos un signo especial')
     }
-    
+
     return errors
   }
 
@@ -107,7 +107,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
 
     } catch (error: any) {
       console.error('Error al registrar usuario:', error)
-      
+
       // Mensajes de error más amigables
       if (error.code === 'auth/email-already-in-use') {
         setError('Este correo ya está registrado. Por favor inicia sesión o usa otro correo.')
@@ -124,7 +124,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
@@ -140,7 +140,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
         </button>
 
         <div className="bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white p-6 sm:p-8 md:p-10 rounded-t-2xl sm:rounded-t-3xl">
-          <div 
+          <div
             className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg"
             aria-hidden="true"
           >
