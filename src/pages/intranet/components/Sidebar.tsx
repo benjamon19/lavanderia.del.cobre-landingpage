@@ -64,7 +64,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'seguimiento',
       label: 'Seguimiento',
       icon: <FaClipboardList />,
-      roles: ['Administrador', 'Trabajador', 'Recepcionista'],
+      roles: ['Administrador', 'Trabajador', 'Recepcionista', 'Cliente'],
       subItems: [
         { label: 'Equipo 1', url: 'https://seguimiento-ot-kohl.vercel.app/' },
         { label: 'Equipo 3', url: 'https://lavanderia-el-cobre-spa.vercel.app/' }
@@ -74,7 +74,9 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'orders',
       label: 'Comandas',
       icon: <FaFileInvoice />,
-      roles: ['Administrador', 'Trabajador', 'Recepcionista'],
+      // ANTES: roles: ['Administrador', 'Trabajador', 'Recepcionista'],
+      // AHORA (Sin Trabajador):
+      roles: ['Administrador', 'Recepcionista'], 
       subItems: [
         { label: 'Equipo 2', url: 'https://lavanderia-el-cobre-sigma.vercel.app' },
         { label: 'Equipo 5', url: 'https://el-cobre-s-pa-jfsm.vercel.app/' }
