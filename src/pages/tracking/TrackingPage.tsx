@@ -187,7 +187,7 @@ export default function TrackingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#f8f9fa] to-white">
-      <TrackingHeader trackingCode={code || 'N/A'} />
+      <TrackingHeader trackingCode={code || 'N/A'} basePath="/tracking" />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 md:py-12">
 

@@ -1,56 +1,64 @@
 // src/pages/tracking/components/TrackingHeader.tsx
-import { useState } from "react"
-import { FaSearch, FaArrowLeft } from "react-icons/fa"
-import { useNavigate } from "react-router-dom"
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { FaSearch, FaArrowLeft, FaArrowRight } from 'react-icons/fa'
 
 interface TrackingHeaderProps {
   trackingCode: string
+  basePath?: string // Nueva propiedad para definir la ruta de búsqueda
 }
 
-export default function TrackingHeader({ trackingCode }: TrackingHeaderProps) {
+export default function TrackingHeader({ trackingCode, basePath = '/tracking' }: TrackingHeaderProps) {
+  const [search, setSearch] = useState('')
   const navigate = useNavigate()
-  const [inputCode, setInputCode] = useState(trackingCode)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (inputCode.trim()) {
-      navigate(`/tracking/${inputCode.trim()}`)
+    if (search.trim()) {
+      navigate(`${basePath}/${search.trim().toUpperCase()}`)
+      setSearch('')
     }
   }
 
-  const handleGoBack = () => {
-    navigate(-1)
-  }
-
   return (
-    <div className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] rounded-b-[2.5rem] shadow-lg px-3 sm:px-4 py-8 sm:py-10 mb-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={handleGoBack}
-            className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center text-white transition-colors backdrop-blur-sm"
-            aria-label="Volver"
-          >
-            <FaArrowLeft className="text-lg sm:text-xl" />
-          </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Rastrea tu pedido</h1>
-        </div>
+    <div className="bg-white shadow-sm sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <Link to="/" className="text-gray-500 hover:text-[#ff6b35] transition-colors p-2 hover:bg-orange-50 rounded-full">
+              <FaArrowLeft />
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold text-[#1a1a2e]">
+                {basePath === '/tracking-g5' ? 'Seguimiento Equipo 1' : 'Seguimiento de Pedido'}
+              </h1>
+              <p className="text-xs text-gray-500 font-medium">Orden <span className="uppercase">#{trackingCode}</span></p>
+            </div>
+          </div>
 
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-            placeholder="Ej: ORD-2011-7479"
-            className="flex-1 px-4 py-3 border-2 border-white/30 bg-white/90 rounded-xl focus:outline-none focus:ring-2 focus:ring-white focus:border-white transition-all text-[#1a1a2e] placeholder:text-gray-500"
-          />
-          <button
-            type="submit"
-            className="bg-white text-[#ff6b35] px-8 py-3 rounded-xl hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center gap-2 shadow-lg"
-          >
-            <FaSearch /> Buscar
-          </button>
-        </form>
+          <form onSubmit={handleSearch} className="relative w-full md:w-96">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={basePath === '/tracking-g5' ? "Buscar otro (Ej: EMP-1)" : "Buscar otro (Ej: LC-2024...)"}
+              // 1. CAMBIO AQUÍ: aumentamos pr-4 a pr-12 para que el texto no se escriba debajo del botón
+              className="w-full pl-10 pr-12 py-2.5 bg-gray-100 border-transparent focus:bg-white border-2 rounded-xl focus:border-[#ff6b35] focus:outline-none transition-all uppercase text-sm font-medium text-[#1a1a2e]"
+            />
+
+            {/* Icono decorativo de la izquierda (sin cambios) */}
+            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+
+            {/* 2. NUEVO: Botón integrado a la derecha */}
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-[#ff6b35] text-white rounded-lg hover:bg-[#e85d2e] transition-colors shadow-sm"
+              aria-label="Buscar"
+            >
+              <FaArrowRight className="text-sm" />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
