@@ -15,7 +15,7 @@ export function validateAndFormatRUT(rut: string): {
   const clean = rut.replace(/[.\-\s]/g, '').toUpperCase()
 
   // Validar que solo contenga números y K
-  if (!/^[0-9]+[0-9Kk]$/.test(clean)) {
+  if (!/^[0-9]+[0-9K]$/.test(clean)) {
     return {
       isValid: false,
       formatted: clean,
@@ -36,7 +36,7 @@ export function validateAndFormatRUT(rut: string): {
 
   // Separar el cuerpo del dígito verificador
   const body = clean.slice(0, -1)
-  const dv = clean.slice(-1).toUpperCase()
+  const dv = clean.slice(-1)
 
   // Calcular el dígito verificador correcto
   let sum = 0
@@ -48,22 +48,48 @@ export function validateAndFormatRUT(rut: string): {
     multiplier = multiplier === 7 ? 2 : multiplier + 1
   }
 
-  const remainder = sum % 11
-  const calculatedDV = remainder < 2 ? remainder.toString() : (11 - remainder).toString()
-  const finalDV = calculatedDV === '10' ? 'K' : calculatedDV
+  const remainder = 11 - (sum % 11)
+  let calculatedDV = remainder.toString()
+
+  if (remainder === 11) {
+    calculatedDV = '0'
+  } else if (remainder === 10) {
+    calculatedDV = 'K'
+  }
 
   // Validar que el dígito verificador sea correcto
-  const isValid = finalDV === dv
+  const isValid = calculatedDV === dv
 
-  // Formatear: agregar guión antes del dígito verificador
-  const formatted = isValid ? `${body}-${finalDV}` : `${body}-${dv}`
+  // Formatear: agregar puntos y guión
+  const formattedBody = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  const formatted = `${formattedBody}-${dv}`
 
   return {
     isValid,
     formatted,
-    clean: `${body}${finalDV}`,
+    clean,
     error: isValid ? undefined : 'El dígito verificador del RUT no es válido'
   }
+}
+
+/**
+ * Formatea un RUT progresivamente mientras se escribe
+ */
+export function formatRut(rut: string): string {
+  // Limpiar el input dejando solo números y k
+  const clean = rut.replace(/[^0-9kK]/g, '').toUpperCase()
+
+  // Si está vacío o es muy corto, devolver limpio
+  if (clean.length <= 1) return clean
+
+  // Separar cuerpo y DV
+  const body = clean.slice(0, -1)
+  const dv = clean.slice(-1)
+
+  // Formatear cuerpo con puntos
+  const formattedBody = body.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+
+  return `${formattedBody}-${dv}`
 }
 
 /**
@@ -79,7 +105,7 @@ export function formatChileanPhone(phone: string): {
 } {
   // Limpiar el teléfono: quitar espacios, guiones, paréntesis y el prefijo +56 o 56
   let clean = phone.replace(/[\s\-\(\)]/g, '')
-  
+
   // Remover prefijos comunes
   if (clean.startsWith('+569')) {
     clean = clean.substring(4)
@@ -125,6 +151,7 @@ export function formatChileanPhone(phone: string): {
 export function cleanRUT(rut: string): string {
   return rut.replace(/[.\-\s]/g, '').toUpperCase()
 }
+
 
 
 

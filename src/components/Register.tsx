@@ -1,9 +1,10 @@
 // src/components/Register.tsx
 import { useState } from 'react'
-import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
+import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle, FaIdCard, FaPhone } from 'react-icons/fa'
+import { createUserWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
+import { validateAndFormatRUT, formatChileanPhone, formatRut } from '../utils/chileanValidators'
 
 interface RegisterProps {
   isOpen: boolean
@@ -18,19 +19,27 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     nombre: '',
     correo: '',
     contraseña: '',
-    confirmarContraseña: ''
+    confirmarContraseña: '',
+    rut: '',
+    telefono: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
 
+  // Estados para validación visual
+  const [rutError, setRutError] = useState<string>('')
+  const [telefonoError, setTelefonoError] = useState<string>('')
+  const [rutFormatted, setRutFormatted] = useState<string>('')
+  const [telefonoFormatted, setTelefonoFormatted] = useState<string>('')
+
   if (!isOpen) return null
 
   // Validar requisitos de contraseña
   const validatePassword = (password: string): string[] => {
     const errors: string[] = []
-    
+
     if (password.length < 8) {
       errors.push('Mínimo 8 caracteres')
     }
@@ -43,7 +52,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
       errors.push('Al menos un signo especial')
     }
-    
+
     return errors
   }
 
@@ -51,6 +60,83 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     const newPassword = e.target.value
     setFormData({ ...formData, contraseña: newPassword })
     setPasswordErrors(validatePassword(newPassword))
+  }
+
+  const handleRUTChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rutValue = e.target.value
+    // Formatear progresivamente
+    const formatted = formatRut(rutValue)
+
+    // Limpiar para guardar en el estado
+    const cleanValue = formatted.replace(/[.\-\s]/g, '').toUpperCase()
+
+    setFormData({ ...formData, rut: formatted })
+
+    if (cleanValue.length >= 8) {
+      const validation = validateAndFormatRUT(cleanValue)
+      if (validation.isValid) {
+        setRutFormatted(validation.formatted)
+        setRutError('')
+      } else {
+        setRutFormatted(validation.formatted)
+        setRutError(validation.error || 'RUT inválido')
+      }
+    } else {
+      setRutFormatted('')
+      setRutError('')
+    }
+  }
+
+  const handleTelefonoFocus = () => {
+    if (!formData.telefono) {
+      setFormData({ ...formData, telefono: '+569' })
+      // Mostrar error inmediatamente para indicar que falta completar
+      setTelefonoError('Complete el número')
+    }
+  }
+
+  const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phoneValue = e.target.value
+
+    // Si el usuario borra todo, permitirlo
+    if (phoneValue === '') {
+      setFormData({ ...formData, telefono: '' })
+      setTelefonoFormatted('')
+      setTelefonoError('')
+      return
+    }
+
+    // Asegurar que empiece con +569 si no está vacío
+    let newValue = phoneValue
+    if (!newValue.startsWith('+569')) {
+      const numbers = newValue.replace(/[^0-9]/g, '')
+      if (numbers.length > 0) {
+        newValue = '+569' + numbers.replace(/^569/, '')
+      }
+    }
+
+    // Permitir solo números y el + inicial
+    if (!/^\+?[0-9]*$/.test(newValue)) return
+
+    setFormData({ ...formData, telefono: newValue })
+
+    // Validar solo la parte numérica después del +569
+    const cleanValue = newValue.replace(/\D/g, '')
+    // 569 + 8 dígitos = 11 dígitos
+    if (cleanValue.length === 11) {
+      const validation = formatChileanPhone(cleanValue)
+      if (validation.isValid) {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError('')
+      } else {
+        setTelefonoFormatted(validation.formatted)
+        setTelefonoError(validation.error || 'Teléfono inválido')
+      }
+    } else {
+      setTelefonoFormatted('')
+      // Mantener el error si no está completo
+      setTelefonoError('Complete el número')
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,6 +153,28 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
     const passwordValidation = validatePassword(formData.contraseña)
     if (passwordValidation.length > 0) {
       setError('La contraseña no cumple con los requisitos mínimos de seguridad')
+      return
+    }
+
+    // Validar RUT
+    if (!formData.rut || formData.rut.length < 8) {
+      setError('Por favor ingresa un RUT válido')
+      return
+    }
+    const rutValidation = validateAndFormatRUT(formData.rut.replace(/[.\-\s]/g, ''))
+    if (!rutValidation.isValid) {
+      setError(rutValidation.error || 'El RUT ingresado no es válido')
+      return
+    }
+
+    // Validar teléfono
+    if (!formData.telefono || formData.telefono.length < 8) {
+      setError('Por favor ingresa un teléfono válido')
+      return
+    }
+    const telefonoValidation = formatChileanPhone(formData.telefono)
+    if (!telefonoValidation.isValid) {
+      setError(telefonoValidation.error || 'El teléfono ingresado no es válido')
       return
     }
 
@@ -90,24 +198,35 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
         uid,
         correo: formData.correo,
         nombre: formData.nombre,
+        rut: rutValidation.clean,
+        telefono: telefonoValidation.formatted,
         rol: 'cliente',
         activo: true,
         fecha_creacion: serverTimestamp(),
         ultimo_acceso: serverTimestamp()
       })
 
+      // Cerrar sesión inmediatamente para evitar auto-login
+      await signOut(auth)
+
       setSuccess(true)
       setFormData({
         nombre: '',
         correo: '',
         contraseña: '',
-        confirmarContraseña: ''
+        confirmarContraseña: '',
+        rut: '',
+        telefono: ''
       })
       setPasswordErrors([])
+      setRutError('')
+      setTelefonoError('')
+      setRutFormatted('')
+      setTelefonoFormatted('')
 
     } catch (error: any) {
       console.error('Error al registrar usuario:', error)
-      
+
       // Mensajes de error más amigables
       if (error.code === 'auth/email-already-in-use') {
         setError('Este correo ya está registrado. Por favor inicia sesión o usa otro correo.')
@@ -124,7 +243,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4"
       role="dialog"
       aria-modal="true"
@@ -140,7 +259,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
         </button>
 
         <div className="bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] text-white p-6 sm:p-8 md:p-10 rounded-t-2xl sm:rounded-t-3xl">
-          <div 
+          <div
             className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg"
             aria-hidden="true"
           >
@@ -158,10 +277,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
                 <div>
                   <p className="text-green-800 font-semibold mb-2">¡Cuenta creada exitosamente!</p>
                   <p className="text-sm text-green-700 mb-3">
-                    Hemos enviado un correo de verificación a <strong>{formData.correo}</strong>
-                  </p>
-                  <p className="text-sm text-green-700">
-                    Por favor revisa tu bandeja de entrada y verifica tu correo antes de iniciar sesión.
+                    Inicia sesión con tu correo y contraseña.
                   </p>
                 </div>
               </div>
@@ -211,6 +327,61 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
                     required
                   />
                 </div>
+              </div>
+
+              {/* RUT */}
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="register-rut" className="block text-xs sm:text-sm font-semibold text-[#1a1a2e] mb-1.5 sm:mb-2">
+                  RUT
+                </label>
+                <div className="relative">
+                  <FaIdCard className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e] text-sm sm:text-base" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="register-rut"
+                    value={formData.rut}
+                    onChange={handleRUTChange}
+                    placeholder="12.345.678-9"
+                    className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e] text-sm sm:text-base
+                      ${rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-[#cfcfd8]'}`}
+                    required
+                    maxLength={12}
+                  />
+                </div>
+                {rutFormatted && !rutError && (
+                  <p className="mt-1 text-xs text-green-600">RUT válido</p>
+                )}
+                {rutError && (
+                  <p className="mt-1 text-xs text-red-600">{rutError}</p>
+                )}
+              </div>
+
+              {/* Teléfono */}
+              <div className="mb-4 sm:mb-5">
+                <label htmlFor="register-phone" className="block text-xs sm:text-sm font-semibold text-[#1a1a2e] mb-1.5 sm:mb-2">
+                  Teléfono
+                </label>
+                <div className="relative">
+                  <FaPhone className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-[#6b6b7e] text-sm sm:text-base" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="register-phone"
+                    value={formData.telefono}
+                    onChange={handleTelefonoChange}
+                    onFocus={handleTelefonoFocus}
+                    placeholder="+569 12345678"
+                    className={`w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 border-2 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all text-[#1a1a2e] text-sm sm:text-base
+                      ${telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-[#cfcfd8]'}`}
+                    required
+                    maxLength={12}
+                  />
+                </div>
+                {telefonoFormatted && !telefonoError && (
+                  <p className="mt-1 text-xs text-green-600">Teléfono válido</p>
+                )}
+                {telefonoError && (
+                  <p className="mt-1 text-xs text-red-600">{telefonoError}</p>
+                )}
               </div>
 
               {/* Contraseña */}
@@ -289,7 +460,7 @@ export default function Register({ isOpen, onClose, onBackToLogin }: RegisterPro
 
               <button
                 type="submit"
-                disabled={loading || passwordErrors.length > 0}
+                disabled={loading || passwordErrors.length > 0 || !!rutError || !!telefonoError}
                 className="w-full bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white py-3 sm:py-3.5 rounded-lg sm:rounded-xl hover:shadow-lg transition-all font-semibold text-base sm:text-lg transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mb-3"
               >
                 {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
