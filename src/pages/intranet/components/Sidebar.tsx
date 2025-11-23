@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../context/AuthContext'
+import Loader from '../../../components/Loader' // Importamos el componente de carga
 
 interface SidebarProps {
   activeModule: string
@@ -37,6 +38,9 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
   const { user } = useAuth()
   const navigate = useNavigate()
   const [expandedMenus, setExpandedMenus] = useState<string[]>([])
+  
+  // Estado para controlar la pantalla de carga al salir a otros sistemas
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev =>
@@ -53,6 +57,19 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
     return `${baseUrl}${separator}auth_token=${user.uid}`
   }
 
+  // Manejador para interceptar el clic y mostrar el loading
+  const handleExternalRedirect = (e: React.MouseEvent, url: string) => {
+    e.preventDefault() // Detener la navegación inmediata
+    setIsRedirecting(true) // Mostrar loading
+
+    // Simular validación de credenciales y handshake (1.5 segundos)
+    setTimeout(() => {
+      const secureUrl = getSecureUrl(url)
+      window.open(secureUrl, '_blank', 'noopener,noreferrer')
+      setIsRedirecting(false) // Ocultar loading después de abrir
+    }, 1500)
+  }
+
   const menuItems: MenuItem[] = [
     {
       id: 'dashboard',
@@ -64,7 +81,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'seguimiento',
       label: 'Seguimiento',
       icon: <FaClipboardList />,
-      roles: ['Administrador', 'Trabajador', 'Recepcionista'],
+      roles: ['Administrador', 'Trabajador', 'Recepcionista', 'Cliente'],
       subItems: [
         { label: 'Equipo 1', url: 'https://seguimiento-ot-kohl.vercel.app/' },
         { label: 'Equipo 3', url: 'https://lavanderia-el-cobre-spa.vercel.app/' }
@@ -74,7 +91,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'orders',
       label: 'Comandas',
       icon: <FaFileInvoice />,
-      roles: ['Administrador', 'Trabajador', 'Recepcionista'],
+      roles: ['Administrador', 'Recepcionista'], // Trabajador quitado según requerimiento anterior
       subItems: [
         { label: 'Equipo 2', url: 'https://lavanderia-el-cobre-sigma.vercel.app' },
         { label: 'Equipo 5', url: 'https://el-cobre-s-pa-jfsm.vercel.app/' }
@@ -110,6 +127,13 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
 
   return (
     <>
+      {/* Loader de Redirección Externa */}
+      <Loader 
+        fullScreen 
+        isLoading={isRedirecting} 
+        text="Cargando Credenciales..." 
+      />
+
       {/* Overlay para móvil */}
       <div
         className={`
@@ -179,11 +203,9 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
                           {item.subItems.map((sub, idx) => (
                             <li key={idx}>
                               <a
-                                // GRACIAS A ESTA LÍNEA, EL EQUIPO 2 RECIBIRÁ EL TOKEN AUTOMÁTICAMENTE
                                 href={getSecureUrl(sub.url)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#6b6b7e] hover:text-[#ff6b35] hover:bg-[#fff4f0] rounded-lg transition-colors"
+                                onClick={(e) => handleExternalRedirect(e, sub.url)} // Interceptamos el click aquí
+                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#6b6b7e] hover:text-[#ff6b35] hover:bg-[#fff4f0] rounded-lg transition-colors cursor-pointer"
                               >
                                 <span>{sub.label}</span>
                                 <FaExternalLinkAlt className="text-[10px]" />
