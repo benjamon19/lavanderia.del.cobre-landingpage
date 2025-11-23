@@ -73,12 +73,12 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
     },
     {
       id: 'orders',
-      label: 'Comandas', // <--- AQUÍ ESTÁ EL EQUIPO 2
+      label: 'Comandas',
       icon: <FaFileInvoice />,
       roles: ['Administrador', 'Trabajador', 'Recepcionista'],
       subItems: [
         { label: 'Equipo 2', url: 'https://lavanderia-el-cobre-sigma.vercel.app' },
-        { label: 'Equipo 5', url: 'https://deploy-equipo-5.vercel.app' }
+        { label: 'Equipo 5', url: 'https://el-cobre-s-pa-jfsm.vercel.app/' }
       ]
     },
     {
@@ -87,7 +87,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       icon: <FaBox />,
       roles: ['Administrador', 'Trabajador'],
       subItems: [
-        { label: 'Equipo 4', url: 'https://lavanderia-cobre-spa.vercel.app' }, 
+        { label: 'Equipo 4', url: 'https://lavanderia-cobre-spa.vercel.app' },
         { label: 'Equipo 7', url: 'https://lavanderia-el-cobre-iota.vercel.app/' }
       ]
     },
