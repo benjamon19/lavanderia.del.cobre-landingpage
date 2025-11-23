@@ -6,8 +6,9 @@ import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 // Importamos la db normal y la configuración para crear la app temporal
 import { db, firebaseConfig } from '../../../config/firebase'
-import { FaUser, FaEnvelope, FaLock, FaUserTag, FaCheckCircle, FaExclamationTriangle, FaPhone, FaIdCard } from 'react-icons/fa'
-import { validateAndFormatRUT, formatChileanPhone } from '../../../utils/chileanValidators'
+import { FaUser, FaEnvelope, FaLock, FaUserTag, FaPhone, FaIdCard } from 'react-icons/fa'
+import { validateAndFormatRUT, formatChileanPhone, formatRut } from '../../../utils/chileanValidators'
+import NotificationModal from '../../../components/NotificationModal'
 
 interface UserFormData {
   correo: string
@@ -33,7 +34,18 @@ export default function UsersModule() {
   })
 
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [notificationModal, setNotificationModal] = useState<{
+    isOpen: boolean
+    type: 'success' | 'error'
+    title: string
+    message: string
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: ''
+  })
+
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const [rutError, setRutError] = useState<string>('')
   const [telefonoError, setTelefonoError] = useState<string>('')
@@ -68,11 +80,15 @@ export default function UsersModule() {
 
   const handleRUTChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rutValue = e.target.value
-    // Permitir solo números y K, sin puntos ni guiones
-    const cleanValue = rutValue.replace(/[^0-9Kk]/g, '')
-    setFormData({ ...formData, rut: cleanValue })
+    // Formatear progresivamente
+    const formatted = formatRut(rutValue)
 
-    if (cleanValue.length >= 7) {
+    // Limpiar para guardar en el estado
+    const cleanValue = formatted.replace(/[.\-\s]/g, '').toUpperCase()
+
+    setFormData({ ...formData, rut: formatted })
+
+    if (cleanValue.length >= 8) {
       const validation = validateAndFormatRUT(cleanValue)
       if (validation.isValid) {
         setRutFormatted(validation.formatted)
@@ -82,18 +98,48 @@ export default function UsersModule() {
         setRutError(validation.error || 'RUT inválido')
       }
     } else {
-      setRutFormatted(cleanValue)
+      setRutFormatted('')
       setRutError('')
+    }
+  }
+
+  const handleTelefonoFocus = () => {
+    if (!formData.telefono) {
+      setFormData({ ...formData, telefono: '+569' })
     }
   }
 
   const handleTelefonoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phoneValue = e.target.value
-    // Permitir solo números
-    const cleanValue = phoneValue.replace(/[^0-9]/g, '')
-    setFormData({ ...formData, telefono: cleanValue })
 
-    if (cleanValue.length > 0) {
+    // Si el usuario borra todo, permitirlo
+    if (phoneValue === '') {
+      setFormData({ ...formData, telefono: '' })
+      setTelefonoFormatted('')
+      setTelefonoError('')
+      return
+    }
+
+    // Asegurar que empiece con +569 si no está vacío
+    let newValue = phoneValue
+    if (!newValue.startsWith('+569')) {
+      // Si el usuario intenta borrar el prefijo, lo restauramos o limpiamos según la lógica
+      // Aquí optamos por mantener el prefijo si hay números
+      const numbers = newValue.replace(/[^0-9]/g, '')
+      if (numbers.length > 0) {
+        newValue = '+569' + numbers.replace(/^569/, '')
+      }
+    }
+
+    // Permitir solo números y el + inicial
+    if (!/^\+?[0-9]*$/.test(newValue)) return
+
+    setFormData({ ...formData, telefono: newValue })
+
+    // Validar solo la parte numérica después del +569
+    const cleanValue = newValue.replace(/\D/g, '')
+    // 569 + 8 dígitos = 11 dígitos
+    if (cleanValue.length === 11) {
       const validation = formatChileanPhone(cleanValue)
       if (validation.isValid) {
         setTelefonoFormatted(validation.formatted)
@@ -110,39 +156,68 @@ export default function UsersModule() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage(null)
 
     // Validaciones básicas
     if (formData.contraseña !== formData.confirmarContraseña) {
-      setMessage({ type: 'error', text: 'Las contraseñas no coinciden' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error de validación',
+        message: 'Las contraseñas no coinciden'
+      })
       return
     }
 
     const passwordValidation = validatePassword(formData.contraseña)
     if (passwordValidation.length > 0) {
-      setMessage({ type: 'error', text: 'La contraseña no cumple con los requisitos mínimos' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Contraseña débil',
+        message: 'La contraseña no cumple con los requisitos mínimos'
+      })
       return
     }
 
     // Validar RUT
     if (!formData.rut || formData.rut.length < 8) {
-      setMessage({ type: 'error', text: 'Por favor ingresa un RUT válido' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'RUT inválido',
+        message: 'Por favor ingresa un RUT válido'
+      })
       return
     }
-    const rutValidation = validateAndFormatRUT(formData.rut)
+    const rutValidation = validateAndFormatRUT(formData.rut.replace(/[.\-\s]/g, ''))
     if (!rutValidation.isValid) {
-      setMessage({ type: 'error', text: rutValidation.error || 'El RUT ingresado no es válido' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'RUT inválido',
+        message: rutValidation.error || 'El RUT ingresado no es válido'
+      })
       return
     }
 
     // Validar teléfono
     if (!formData.telefono || formData.telefono.length < 8) {
-      setMessage({ type: 'error', text: 'Por favor ingresa un teléfono válido (8 dígitos)' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Teléfono inválido',
+        message: 'Por favor ingresa un teléfono válido (8 dígitos)'
+      })
       return
     }
     const telefonoValidation = formatChileanPhone(formData.telefono)
     if (!telefonoValidation.isValid) {
-      setMessage({ type: 'error', text: telefonoValidation.error || 'El teléfono ingresado no es válido' })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Teléfono inválido',
+        message: telefonoValidation.error || 'El teléfono ingresado no es válido'
+      })
       return
     }
 
@@ -177,7 +252,7 @@ export default function UsersModule() {
         rut: rutValidation.clean,
         telefono: telefonoValidation.formatted,
         rol: formData.rol,
-        activo: formData.activo,
+        activo: true, // Siempre activo por defecto
         fecha_creacion: serverTimestamp(),
         ultimo_acceso: serverTimestamp()
       })
@@ -185,9 +260,11 @@ export default function UsersModule() {
       // 5. Cerrar sesión en la app secundaria
       await signOut(secondaryAuth);
 
-      setMessage({
+      setNotificationModal({
+        isOpen: true,
         type: 'success',
-        text: `Usuario ${formData.nombre} creado exitosamente. Se ha enviado un correo de verificación a ${formData.correo}`
+        title: 'Usuario Creado',
+        message: `Usuario ${formData.nombre} creado exitosamente. Ya puede iniciar sesión con su correo y contraseña`
       })
 
       // Limpiar formulario
@@ -222,7 +299,12 @@ export default function UsersModule() {
         errorMessage = 'Error de conexión. Verifica tu internet.'
       }
 
-      setMessage({ type: 'error', text: errorMessage })
+      setNotificationModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Error',
+        message: errorMessage
+      })
     } finally {
       // 6. Limpiar la app secundaria de la memoria
       if (secondaryApp) {
@@ -234,6 +316,14 @@ export default function UsersModule() {
 
   return (
     <div>
+      <NotificationModal
+        isOpen={notificationModal.isOpen}
+        onClose={() => setNotificationModal({ ...notificationModal, isOpen: false })}
+        type={notificationModal.type}
+        title={notificationModal.title}
+        message={notificationModal.message}
+      />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#1a1a2e] mb-2">Gestión de Usuarios</h1>
         <p className="text-[#6b6b7e]">Crear y administrar usuarios del sistema</p>
@@ -250,21 +340,6 @@ export default function UsersModule() {
               <p className="text-sm text-[#6b6b7e]">Completa todos los campos del formulario</p>
             </div>
           </div>
-
-          {message && (
-            <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 ${message.type === 'success'
-              ? 'bg-green-50 border-2 border-green-200 text-green-700'
-              : 'bg-red-50 border-2 border-red-200 text-red-700'
-              }`}>
-              {message.type === 'success' ? (
-                <FaCheckCircle className="text-xl flex-shrink-0 mt-0.5" />
-              ) : (
-                <FaExclamationTriangle className="text-xl flex-shrink-0 mt-0.5" />
-              )}
-              <p className="font-medium">{message.text}</p>
-            </div>
-
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Nombre */}
@@ -314,11 +389,12 @@ export default function UsersModule() {
                   type="text"
                   value={formData.rut}
                   onChange={handleRUTChange}
-                  className={` w-full  p l-12  p r-4  p y-3 bord e r-2 round e d-xl focu s:outli n e-none focu s:ri n g-2 focu s:ri n g-[#ff6b35] focu s:bord e r-transparent transiti o n-all 
+                  className={` w-full  pl-12  pr-4  py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all 
     ${rutError ? 'border-red-300' : rutFormatted && !rutError ? 'border-green-300' : 'border-gray-200'
                     }`}
-                  placeholder="123456789 (sin puntos ni guión)"
+                  placeholder="12.345.678-9"
                   required
+                  maxLength={12}
                 />
               </div>
               {rutFormatted && !rutError && (
@@ -327,7 +403,7 @@ export default function UsersModule() {
               {rutError && (
                 <p className="mt-1 text-xs text-red-600">{rutError}</p>
               )}
-              <p className="mt-1 text-xs text-[#6b6b7e]">Ingresa el RUT sin puntos ni guión (ej: 123456789)</p>
+              <p className="mt-1 text-xs text-[#6b6b7e]">El formato se ajustará automáticamente</p>
             </div>
 
             {/* Teléfono */}
@@ -341,11 +417,13 @@ export default function UsersModule() {
                   type="text"
                   value={formData.telefono}
                   onChange={handleTelefonoChange}
-                  className={` w-full  p l-12  p r-4  p y-3 bord e r-2 round e d-xl focu s:outli n e-none focu s:ri n g-2 focu s:ri n g-[#ff6b35] focu s:bord e r-transparent transiti o n-all 
+                  onFocus={handleTelefonoFocus}
+                  className={` w-full  pl-12  pr-4  py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff6b35] focus:border-transparent transition-all 
     ${telefonoError ? 'border-red-300' : telefonoFormatted && !telefonoError ? 'border-green-300' : 'border-gray-200'
                     }`}
-                  placeholder="12345678 (8 dígitos)"
+                  placeholder="+569 12345678"
                   required
+                  maxLength={12}
                 />
               </div>
               {telefonoFormatted && !telefonoError && (
@@ -425,20 +503,6 @@ export default function UsersModule() {
                   <option value="cliente">Cliente</option>
                 </select>
               </div>
-            </div>
-
-            {/* Estado Activo */}
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-              <input
-                type="checkbox"
-                id="activo"
-                checked={formData.activo}
-                onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
-                className="w-5 h-5 text-[#ff6b35] border-gray-300 rounded focus:ring-[#ff6b35]"
-              />
-              <label htmlFor="activo" className="text-sm font-semibold text-[#2c2c3e] cursor-pointer">
-                Usuario activo
-              </label>
             </div>
 
             {/* Botón de envío */}

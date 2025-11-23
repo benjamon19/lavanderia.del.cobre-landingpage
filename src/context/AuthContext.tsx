@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 import { setCookie, deleteCookie } from '../utils/cookies'
@@ -21,7 +21,6 @@ interface AuthContextType {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   logout: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
-  resendVerification: () => Promise<void>
   refreshUser: () => Promise<void>
   setIsCreatingUser: (value: boolean) => void
   isAuthenticated: boolean
@@ -110,12 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Autenticar con Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const firebaseUser = userCredential.user
-
-      // Verificar si el correo está verificado
-      if (!firebaseUser.emailVerified) {
-        await signOut(auth)
-        throw new Error('Por favor verifica tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.')
-      }
 
       // Obtener datos del usuario desde Firestore
       const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid))
@@ -215,20 +208,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const resendVerification = async (): Promise<void> => {
-    try {
-      const currentUser = auth.currentUser
-      if (currentUser && !currentUser.emailVerified) {
-        await sendEmailVerification(currentUser)
-      } else {
-        throw new Error('No hay usuario para verificar')
-      }
-    } catch (error: any) {
-      console.error('Error al reenviar verificación:', error)
-      throw new Error('Error al enviar el correo de verificación. Intenta más tarde.')
-    }
-  }
-
   const refreshUser = async (): Promise<void> => {
     try {
       const currentUser = auth.currentUser
@@ -277,7 +256,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     resetPassword,
-    resendVerification,
     refreshUser,
     setIsCreatingUser,
     isAuthenticated: !!user,
