@@ -6,7 +6,7 @@ import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut
 import { doc, setDoc, serverTimestamp, collection, getDocs, query, orderBy, updateDoc } from 'firebase/firestore'
 // Importamos la db normal y la configuración para crear la app temporal
 import { db, firebaseConfig } from '../../../config/firebase'
-import { FaUser, FaEnvelope, FaLock, FaUserTag, FaPhone, FaIdCard, FaEdit, FaTrash, FaEye, FaSearch, FaUserPlus, FaUsersCog, FaTimes, FaCheck, FaBan, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { FaUser, FaEnvelope, FaLock, FaUserTag, FaPhone, FaIdCard, FaEdit, FaTrash, FaEye, FaSearch, FaUserPlus, FaUsersCog, FaTimes, FaBan, FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { validateAndFormatRUT, formatChileanPhone, formatRut } from '../../../utils/chileanValidators'
 import NotificationModal from '../../../components/NotificationModal'
 
@@ -493,8 +493,8 @@ export default function UsersModule() {
         <button
           onClick={() => setActiveTab('create')}
           className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 ${activeTab === 'create'
-              ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
-              : 'text-gray-500 hover:text-[#ff6b35]'
+            ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
+            : 'text-gray-500 hover:text-[#ff6b35]'
             }`}
         >
           <FaUserPlus /> Crear Usuario
@@ -502,8 +502,8 @@ export default function UsersModule() {
         <button
           onClick={() => setActiveTab('manage')}
           className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 ${activeTab === 'manage'
-              ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
-              : 'text-gray-500 hover:text-[#ff6b35]'
+            ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
+            : 'text-gray-500 hover:text-[#ff6b35]'
             }`}
         >
           <FaUsersCog /> Gestionar Usuarios
@@ -765,8 +765,8 @@ export default function UsersModule() {
                     key={page}
                     onClick={() => handlePageChange(page)}
                     className={`w-8 h-8 rounded-lg font-medium transition-colors ${currentPage === page
-                        ? 'bg-[#ff6b35] text-white'
-                        : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
+                      ? 'bg-[#ff6b35] text-white'
+                      : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
                       }`}
                   >
                     {page}
