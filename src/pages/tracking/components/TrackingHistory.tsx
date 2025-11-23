@@ -52,11 +52,12 @@ export default function TrackingHistory({ history }: TrackingHistoryProps) {
   const getEstadoDisplayName = (estado: string): string => {
     const estadoMap: Record<string, string> = {
       'pendiente': 'Procesos Pendientes',
-      'lavado': 'Lavado',
-      'secado': 'Secado',
-      'planchado': 'Planchado',
+      'lavando': 'Lavado',
+      'secando': 'Secado',
+      'planchando': 'Planchado',
       'empaquetado': 'Empaquetado',
-      'preparando_despacho': 'Preparando Despacho',
+      'listo_despacho': 'Preparando Despacho',
+      'listo_retiro': 'Listo para Retirar',
       'en_despacho': 'En Despacho',
       'entregado': 'Entregado'
     }

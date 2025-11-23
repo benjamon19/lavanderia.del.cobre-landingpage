@@ -11,6 +11,7 @@ import TrackingHistory from './components/TrackingHistory'
 interface OrderData {
   comanda_id: string
   estadoActual: string
+  tipoEntrega?: string
   historialEstados?: Array<{
     estado: string
     comentario: string
@@ -83,6 +84,7 @@ export default function TrackingPage() {
                   seguimientoData.fechaIngreso = comandaData.fechaIngreso
                   seguimientoData.horaIngreso = comandaData.horaIngreso
                   seguimientoData.servicioExpress = comandaData.servicioExpress
+                  seguimientoData.tipoEntrega = comandaData.tipoEntrega
                 }
               } catch (err) {
                 console.error('Error al obtener datos de comanda:', err)
@@ -112,6 +114,7 @@ export default function TrackingPage() {
                 seguimientoData.fechaIngreso = comandaData.fechaIngreso
                 seguimientoData.horaIngreso = comandaData.horaIngreso
                 seguimientoData.servicioExpress = comandaData.servicioExpress
+                seguimientoData.tipoEntrega = comandaData.tipoEntrega
               }
             } catch (err) {
               console.error('Error al obtener datos de comanda:', err)
@@ -213,6 +216,7 @@ export default function TrackingPage() {
             <div className="mb-6 sm:mb-8">
               <TrackingTimeline
                 currentEstado={orderData.estadoActual}
+                tipoEntrega={orderData.tipoEntrega}
                 history={orderData.historialEstados?.map(h => ({
                   estado: h.estado,
                   fechaCambio: h.fechaCambio

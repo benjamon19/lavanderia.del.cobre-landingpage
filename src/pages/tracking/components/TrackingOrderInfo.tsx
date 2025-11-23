@@ -41,7 +41,7 @@ export default function TrackingOrderInfo({
 
         {(entryDate || entryTime) && (
           <div className="text-right">
-            <p className="text-xs sm:text-sm text-[#6b6b7e] mb-1">Ingreso</p>
+            <p className="text-xs sm:text-sm text-[#6b6b7e] mb-1">Ingreso:</p>
             {entryDate && (
               <p className="text-sm sm:text-base md:text-lg font-semibold text-[#1a1a2e]">
                 {entryDate}

@@ -28,17 +28,19 @@ interface Stage {
 interface TrackingTimelineProps {
     currentEstado?: string
     history?: HistoryEvent[]
+    tipoEntrega?: string
 }
 
-export default function TrackingTimeline({ currentEstado, history = [] }: TrackingTimelineProps) {
+export default function TrackingTimeline({ currentEstado, history = [], tipoEntrega = 'retiro' }: TrackingTimelineProps) {
     // Mapeo de estados a IDs de etapa
     const estadoToStageId: Record<string, number> = {
         'pendiente': 1,
-        'lavado': 2,
-        'secado': 3,
-        'planchado': 4,
+        'lavando': 2,
+        'secando': 3,
+        'planchando': 4,
         'empaquetado': 5,
-        'preparando_despacho': 6,
+        'listo_despacho': 6,
+        'listo_retiro': 6,
         'en_despacho': 7,
         'entregado': 8
     }
@@ -90,34 +92,34 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
             description: 'Tu pedido ha sido recibido y registrado',
             icon: <FaClipboardCheck className="text-base sm:text-xl md:text-2xl" />,
             timestamp: getTimestampForEstado('pendiente'),
-            status: currentStageId >= 1 ? (currentStageId > 1 ? 'completed' : 'in-progress') : 'pending'
+            status: currentStageId > 1 ? 'completed' : (currentStageId === 1 ? 'in-progress' : 'pending')
         },
         {
             id: 2,
-            estado: 'lavado',
+            estado: 'lavando',
             name: 'Lavado',
             description: 'Tu ropa está siendo lavada con cuidado',
             icon: <FaDroplet className="text-base sm:text-xl md:text-2xl" />,
-            timestamp: getTimestampForEstado('lavado'),
-            status: currentStageId > 2 ? 'completed' : currentStageId === 2 ? 'in-progress' : 'pending'
+            timestamp: getTimestampForEstado('lavando'),
+            status: currentStageId > 2 ? 'completed' : (currentStageId === 2 ? 'in-progress' : 'pending')
         },
         {
             id: 3,
-            estado: 'secado',
+            estado: 'secando',
             name: 'Secado',
             description: 'Proceso de secado en marcha',
             icon: <FaWind className="text-base sm:text-xl md:text-2xl" />,
-            timestamp: getTimestampForEstado('secado'),
-            status: currentStageId > 3 ? 'completed' : currentStageId === 3 ? 'in-progress' : 'pending'
+            timestamp: getTimestampForEstado('secando'),
+            status: currentStageId > 3 ? 'completed' : (currentStageId === 3 ? 'in-progress' : 'pending')
         },
         {
             id: 4,
-            estado: 'planchado',
+            estado: 'planchando',
             name: 'Planchado',
             description: 'Tu ropa está siendo planchada',
             icon: <GiIronCross className="text-base sm:text-xl md:text-2xl" />,
-            timestamp: getTimestampForEstado('planchado'),
-            status: currentStageId > 4 ? 'completed' : currentStageId === 4 ? 'in-progress' : 'pending'
+            timestamp: getTimestampForEstado('planchando'),
+            status: currentStageId > 4 ? 'completed' : (currentStageId === 4 ? 'in-progress' : 'pending')
         },
         {
             id: 5,
@@ -126,16 +128,25 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
             description: 'Tu pedido está siendo empaquetado',
             icon: <FaBox className="text-base sm:text-xl md:text-2xl" />,
             timestamp: getTimestampForEstado('empaquetado'),
-            status: currentStageId > 5 ? 'completed' : currentStageId === 5 ? 'in-progress' : 'pending'
+            status: currentStageId > 5 ? 'completed' : (currentStageId === 5 ? 'in-progress' : 'pending')
         },
         {
             id: 6,
-            estado: 'preparando_despacho',
+            estado: 'listo_despacho',
             name: 'Preparando Despacho',
             description: 'Tu pedido está siendo preparado para el despacho',
             icon: <FaBox className="text-base sm:text-xl md:text-2xl" />,
-            timestamp: getTimestampForEstado('preparando_despacho'),
-            status: currentStageId > 6 ? 'completed' : currentStageId === 6 ? 'in-progress' : 'pending'
+            timestamp: getTimestampForEstado('listo_despacho'),
+            status: currentStageId > 6 ? 'completed' : (currentStageId === 6 ? 'in-progress' : 'pending')
+        },
+        {
+            id: 6,
+            estado: 'listo_retiro',
+            name: 'Listo para Retirar',
+            description: 'Tu pedido está siendo preparado para el despacho',
+            icon: <FaBox className="text-base sm:text-xl md:text-2xl" />,
+            timestamp: getTimestampForEstado('listo_retiro'),
+            status: currentStageId > 6 ? 'completed' : (currentStageId === 6 ? 'in-progress' : 'pending')
         },
         {
             id: 7,
@@ -144,7 +155,7 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
             description: 'Tu pedido está en camino',
             icon: <FaTruck className="text-base sm:text-xl md:text-2xl" />,
             timestamp: getTimestampForEstado('en_despacho'),
-            status: currentStageId > 7 ? 'completed' : currentStageId === 7 ? 'in-progress' : 'pending'
+            status: currentStageId > 7 ? 'completed' : (currentStageId === 7 ? 'in-progress' : 'pending')
         },
         {
             id: 8,
@@ -156,6 +167,10 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
             status: currentStageId >= 8 ? 'completed' : 'pending'
         }
     ]
+
+    const filteredStages = tipoEntrega === 'despacho'
+        ? stages.filter(s => s.estado !== 'listo_retiro')
+        : stages.filter(s => !['listo_despacho', 'en_despacho'].includes(s.estado));
 
     const getStatusStyles = (status: Stage['status']) => {
         switch (status) {
@@ -187,14 +202,13 @@ export default function TrackingTimeline({ currentEstado, history = [] }: Tracki
         <div className="w-full py-4 sm:py-8 overflow-x-auto">
             <div className="min-w-[320px] px-2">
                 <div className="flex justify-between items-start relative">
-                    {stages.map((stage, index) => {
-                        const isLast = index === stages.length - 1
+                    {filteredStages.map((stage, index) => {
                         const styles = getStatusStyles(stage.status)
 
                         return (
                             <div key={stage.id} className="relative flex flex-col items-center flex-1">
                                 {/* Línea conectora horizontal */}
-                                {!isLast && (
+                                {index < filteredStages.length - 1 && (
                                     <div
                                         className={`absolute top-6 sm:top-7 left-1/2 w-full h-0.5 sm:h-1 ${styles.line} -z-0`}
                                     />
