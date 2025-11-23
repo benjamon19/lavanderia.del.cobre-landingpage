@@ -6,7 +6,7 @@ interface LoaderProps {
   fullScreen?: boolean
   /** Controla si se muestra o no (útil para transiciones de salida) */
   isLoading?: boolean
-  /** Texto opcional debajo del spinner */
+  /** Texto opcional debajo del spinner. Por defecto: "Cargando..." */
   text?: string
   /** Clase adicional para el contenedor */
   className?: string
@@ -15,7 +15,7 @@ interface LoaderProps {
 export default function Loader({ 
   fullScreen = false, 
   isLoading = true, 
-  text,
+  text = "Cargando...", // Valor por defecto si no se envía nada
   className = "" 
 }: LoaderProps) {
   const [show, setShow] = useState(isLoading)
@@ -36,11 +36,9 @@ export default function Loader({
   const spinner = (
     <div className="flex flex-col items-center justify-center gap-4">
       <div className="w-12 h-12 border-4 border-[#ff6b35]/20 border-t-[#ff6b35] rounded-full animate-spin"></div>
-      {text && (
-        <p className="text-sm font-bold text-[#6b6b7e] animate-pulse tracking-widest uppercase">
-          {text}
-        </p>
-      )}
+      <p className="text-sm font-bold text-[#6b6b7e] animate-pulse tracking-widest uppercase">
+        {text}
+      </p>
     </div>
   )
 
@@ -54,8 +52,9 @@ export default function Loader({
         {/* Versión FullScreen con fondo blanco */}
         <div className="flex flex-col items-center justify-center gap-4">
           <div className="w-16 h-16 border-4 border-slate-100 border-t-[#ff6b35] rounded-full animate-spin shadow-lg"></div>
+          {/* AQUI ESTABA EL ERROR: Ahora usa la variable 'text' */}
           <p className="text-sm font-bold text-slate-500 animate-pulse tracking-widest uppercase mt-2">
-            Cargando...
+            {text}
           </p>
         </div>
       </div>
