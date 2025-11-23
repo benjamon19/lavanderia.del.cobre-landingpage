@@ -9,7 +9,6 @@ import {
   FaTimes,
   FaUsers,
   FaChevronDown,
-  FaChevronRight,
   FaExternalLinkAlt
 } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
@@ -162,27 +161,38 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
                       <span className="text-sm">{item.label}</span>
                     </div>
                     {item.subItems && (
-                      <span className="text-xs opacity-60">{isExpanded ? <FaChevronDown /> : <FaChevronRight />}</span>
+                      <span className={`text-xs opacity-60 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                        <FaChevronDown />
+                      </span>
                     )}
                   </button>
 
-                  {item.subItems && isExpanded && (
-                    <ul className="mt-1 ml-4 space-y-1 border-l-2 border-[#f0f0f5] pl-2 animate-fadeIn">
-                      {item.subItems.map((sub, idx) => (
-                        <li key={idx}>
-                          <a
-                            // GRACIAS A ESTA LÍNEA, EL EQUIPO 2 RECIBIRÁ EL TOKEN AUTOMÁTICAMENTE
-                            href={getSecureUrl(sub.url)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#6b6b7e] hover:text-[#ff6b35] hover:bg-[#fff4f0] rounded-lg transition-colors"
-                          >
-                            <span>{sub.label}</span>
-                            <FaExternalLinkAlt className="text-[10px]" />
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                  {item.subItems && (
+                    <div
+                      className={`
+                        grid transition-[grid-template-rows] duration-300 ease-out
+                        ${isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}
+                      `}
+                    >
+                      <ul className="overflow-hidden">
+                        <div className="mt-1 ml-4 space-y-1 border-l-2 border-[#f0f0f5] pl-2 pb-2">
+                          {item.subItems.map((sub, idx) => (
+                            <li key={idx}>
+                              <a
+                                // GRACIAS A ESTA LÍNEA, EL EQUIPO 2 RECIBIRÁ EL TOKEN AUTOMÁTICAMENTE
+                                href={getSecureUrl(sub.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-[#6b6b7e] hover:text-[#ff6b35] hover:bg-[#fff4f0] rounded-lg transition-colors"
+                              >
+                                <span>{sub.label}</span>
+                                <FaExternalLinkAlt className="text-[10px]" />
+                              </a>
+                            </li>
+                          ))}
+                        </div>
+                      </ul>
+                    </div>
                   )}
                 </li>
               )
