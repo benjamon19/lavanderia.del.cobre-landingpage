@@ -206,10 +206,10 @@ export default function AdminDashboard() {
         <div className="w-full xl:w-auto flex flex-row items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           <div className="bg-slate-100 p-1 rounded-xl flex flex-row flex-nowrap min-w-fit">
             <button onClick={() => setActiveTab('solucion1')} className={`px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${activeTab === 'solucion1' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              Solución 1 <span className="hidden sm:inline text-[10px] opacity-70 ml-1">(Eq. 1, 5, 7)</span>
+              Solución 1
             </button>
             <button onClick={() => setActiveTab('solucion2')} className={`px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${activeTab === 'solucion2' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-              Solución 2 <span className="hidden sm:inline text-[10px] opacity-70 ml-1">(Eq. 3, 2, 4)</span>
+              Solución 2
             </button>
           </div>
           <button onClick={fetchData} className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:border-[#ff6b35] hover:text-[#ff6b35] transition-colors shadow-sm">

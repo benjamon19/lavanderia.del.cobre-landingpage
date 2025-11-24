@@ -2,12 +2,17 @@
 import { useState } from 'react'
 import { FaEye, FaEyeSlash, FaTimes, FaUser, FaLock, FaEnvelope, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
+import { getDoc, doc } from 'firebase/firestore'
+import { db, auth } from '../config/firebase'
+import { useNavigate } from 'react-router-dom' // IMPORTANTE: Agregar esto
 
 interface LoginProps {
   isOpen: boolean
   onClose: () => void
   onOpenRegister: () => void
 }
+
+const URL_APP_REPARTIDOR = 'https://lavanderia-el-cobre-spa.vercel.app/';
 
 export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false)
@@ -19,7 +24,9 @@ export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
   const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-  const { login, resetPassword } = useAuth()
+
+  const { login, resetPassword, logout } = useAuth()
+  const navigate = useNavigate()
 
   if (!isOpen) return null
 
@@ -29,11 +36,42 @@ export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
     setLoading(true)
 
     try {
+      // 1. Login en Firebase (ya no redirige automáticamente)
       await login(email, password, rememberMe)
+
+      // 2. Verificación de Rol
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const userDoc = await getDoc(doc(db, 'usuarios', currentUser.uid));
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const userRol = (userData.rol || '').toLowerCase();
+
+          if (userRol === 'repartidor') {
+            const redirectUrl = `${URL_APP_REPARTIDOR}?token=${currentUser.uid}`;
+
+            window.open(redirectUrl, '_blank', 'noopener,noreferrer');
+
+            await logout();
+
+            // Cerramos el modal y limpiamos
+            onClose();
+            setEmail('');
+            setPassword('');
+            return;
+          }
+        }
+      }
+
+      navigate('/intranet/dashboard');
+
       onClose()
       setEmail('')
       setPassword('')
-      setRememberMe(false) // Resetear el checkbox después del login
+      setRememberMe(false)
+
     } catch (error: any) {
       setError(error.message || 'Error al iniciar sesión')
     } finally {

@@ -190,7 +190,7 @@ export default function ClientDashboard() {
                 activeTab === 'solucion1' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Solución 1 <span className="hidden sm:inline text-[10px] opacity-70 ml-1">(Eq. 5)</span>
+              Solución 1
             </button>
             <button
               onClick={() => setActiveTab('solucion2')}
@@ -198,7 +198,7 @@ export default function ClientDashboard() {
                 activeTab === 'solucion2' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Solución 2 <span className="hidden sm:inline text-[10px] opacity-70 ml-1">(Eq. 2)</span>
+              Solución 2
             </button>
           </div>
 

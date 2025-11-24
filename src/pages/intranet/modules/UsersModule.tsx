@@ -17,7 +17,8 @@ interface UserFormData {
   nombre: string
   rut: string
   telefono: string
-  rol: 'administrador' | 'cliente' | 'operario' | 'recepcionista'
+  // CAMBIO: Añadido 'repartidor' a los roles permitidos
+  rol: 'administrador' | 'cliente' | 'operario' | 'recepcionista' | 'repartidor'
   activo: boolean
 }
 
@@ -489,10 +490,10 @@ export default function UsersModule() {
       </div>
 
       {/* Pestañas */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('create')}
-          className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 ${activeTab === 'create'
+          className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'create'
             ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
             : 'text-gray-500 hover:text-[#ff6b35]'
             }`}
@@ -501,7 +502,7 @@ export default function UsersModule() {
         </button>
         <button
           onClick={() => setActiveTab('manage')}
-          className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 ${activeTab === 'manage'
+          className={`pb-3 px-4 font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'manage'
             ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]'
             : 'text-gray-500 hover:text-[#ff6b35]'
             }`}
@@ -524,7 +525,7 @@ export default function UsersModule() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Formulario de Creación (Mismo código anterior) */}
+              {/* Formulario de Creación */}
               <div>
                 <label className="block text-sm font-semibold text-[#2c2c3e] mb-2">Nombre Completo</label>
                 <div className="relative">
@@ -642,10 +643,12 @@ export default function UsersModule() {
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#ff6b35] focus:outline-none transition-colors appearance-none bg-white"
                     required
                   >
-                    <option value="administrador">Administrador</option>
-                    <option value="recepcionista">Recepcionista</option>
-                    <option value="operario">Operario</option>
                     <option value="cliente">Cliente</option>
+                    <option value="operario">Operario</option>
+                    <option value="recepcionista">Recepcionista</option>
+                    <option value="administrador">Administrador</option>
+                    {/* CAMBIO: Opción de Repartidor agregada */}
+                    <option value="repartidor">Repartidor (uso exclusivo equipo 3)</option>
                   </select>
                 </div>
               </div>
@@ -661,7 +664,7 @@ export default function UsersModule() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8">
           {/* Barra de búsqueda */}
           <div className="mb-6 relative">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -674,8 +677,10 @@ export default function UsersModule() {
             />
           </div>
 
-          {/* Tabla de Usuarios */}
-          <div className="overflow-x-auto mb-4">
+          {/* CAMBIO: Tabla Responsive */}
+          
+          {/* Vista Desktop (Tabla Tradicional) - Oculta en pantallas pequeñas */}
+          <div className="hidden md:block overflow-x-auto mb-4">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
@@ -745,10 +750,65 @@ export default function UsersModule() {
             </table>
           </div>
 
-          {/* Paginación */}
+          {/* Vista Mobile (Tarjetas) - Visible solo en pantallas pequeñas */}
+          <div className="md:hidden space-y-4 mb-4">
+            {loadingUsers ? (
+              <div className="text-center py-8 text-gray-500">Cargando usuarios...</div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">No se encontraron usuarios</div>
+            ) : (
+              currentUsers.map((user) => (
+                <div key={user.uid} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-bold text-[#2c2c3e]">{user.nombre}</h3>
+                      <p className="text-sm text-gray-500 break-all">{user.correo}</p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.activo ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {user.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <span className="inline-block px-3 py-1 bg-orange-100 text-[#ff6b35] rounded-full text-xs font-medium capitalize">
+                      {user.rol}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-end gap-2 border-t pt-3 border-gray-100">
+                    <button
+                      onClick={() => handleViewUser(user)}
+                      className="p-2 text-blue-500 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                      title="Ver detalles"
+                    >
+                      <FaEye />
+                    </button>
+                    <button
+                      onClick={() => handleEditUser(user)}
+                      className="p-2 text-orange-500 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
+                      title="Editar"
+                    >
+                      <FaEdit />
+                    </button>
+                    {user.activo && (
+                      <button
+                        onClick={() => handleDeleteUserClick(user)}
+                        className="p-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        title="Desactivar"
+                      >
+                        <FaTrash />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Paginación (Compartida para ambas vistas) */}
           {!loadingUsers && filteredUsers.length > 0 && (
-            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-              <div className="text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 pt-4 gap-4">
+              <div className="text-sm text-gray-500 text-center sm:text-left">
                 Mostrando {startIndex + 1} - {Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)} de {filteredUsers.length} usuarios
               </div>
               <div className="flex gap-2">
@@ -760,18 +820,25 @@ export default function UsersModule() {
                   <FaChevronLeft className="text-gray-600" />
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`w-8 h-8 rounded-lg font-medium transition-colors ${currentPage === page
-                      ? 'bg-[#ff6b35] text-white'
-                      : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
-                      }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {/* En mobile mostramos menos números de página para no romper el layout */}
+                <div className="hidden sm:flex gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`w-8 h-8 rounded-lg font-medium transition-colors ${currentPage === page
+                        ? 'bg-[#ff6b35] text-white'
+                        : 'text-gray-600 hover:bg-gray-50 border border-gray-200'
+                        }`}
+                    >
+                        {page}
+                    </button>
+                    ))}
+                </div>
+                {/* Indicador de página simple para mobile */}
+                <div className="sm:hidden flex items-center px-2 text-sm font-medium text-gray-600">
+                   Pág {currentPage} de {totalPages}
+                </div>
 
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
@@ -800,7 +867,7 @@ export default function UsersModule() {
               <FaUser className="text-[#ff6b35]" /> Detalles del Usuario
             </h2>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-gray-500">Nombre</label>
                   <p className="font-medium text-[#2c2c3e]">{selectedUser.nombre}</p>
@@ -811,7 +878,7 @@ export default function UsersModule() {
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Correo</label>
-                  <p className="font-medium text-[#2c2c3e]">{selectedUser.correo}</p>
+                  <p className="font-medium text-[#2c2c3e] break-all">{selectedUser.correo}</p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-500">Teléfono</label>
@@ -900,6 +967,8 @@ export default function UsersModule() {
                   <option value="recepcionista">Recepcionista</option>
                   <option value="operario">Operario</option>
                   <option value="cliente">Cliente</option>
+                  {/* CAMBIO: También se añade aquí para poder editar si el usuario es repartidor */}
+                  <option value="repartidor">Repartidor (uso exclusivo equipo 3)</option>
                 </select>
               </div>
               <div>

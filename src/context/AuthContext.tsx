@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [isCreatingUser, setIsCreatingUser] = useState(false)
 
-  // Mapear roles de Firestore a roles del sistema
   const mapRole = (firestoreRole: string): UserRole => {
     const roleMap: Record<string, UserRole> = {
       'administrador': 'Administrador',
@@ -46,23 +45,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return roleMap[firestoreRole] || null
   }
 
-  // Verificar sesión de Firebase al iniciar
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Si estamos creando un usuario, ignorar cambios temporales de autenticación
-      if (isCreatingUser) {
-        return
-      }
+      if (isCreatingUser) return
 
       if (firebaseUser) {
         try {
-          // Obtener datos del usuario desde Firestore
           const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid))
 
           if (userDoc.exists()) {
             const userData = userDoc.data()
-
-            // Verificar si el usuario está activo
             if (userData.activo) {
               const mappedUser: User = {
                 uid: firebaseUser.uid,
@@ -74,13 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setUser(mappedUser)
               localStorage.setItem('user', JSON.stringify(mappedUser))
             } else {
-              // Usuario inactivo
               await signOut(auth)
               setUser(null)
               localStorage.removeItem('user')
             }
           } else {
-            // Usuario no existe en Firestore
             await signOut(auth)
             setUser(null)
             localStorage.removeItem('user')
@@ -102,15 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string, rememberMe: boolean = false): Promise<void> => {
     try {
-      // Configurar persistencia según el checkbox "Recuérdame"
-      // LOCAL: mantiene la sesión incluso después de cerrar el navegador
-      // SESSION: la sesión expira cuando se cierra la pestaña/ventana del navegador
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence)
-      // Autenticar con Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       const firebaseUser = userCredential.user
 
-      // Obtener datos del usuario desde Firestore
       const userDoc = await getDoc(doc(db, 'usuarios', firebaseUser.uid))
 
       if (!userDoc.exists()) {
@@ -120,7 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const userData = userDoc.data()
 
-      // Verificar si el usuario está activo
       if (!userData.activo) {
         await signOut(auth)
         throw new Error('Tu cuenta está inactiva. Por favor contacta al administrador para más información.')
@@ -134,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         activo: userData.activo
       }
 
-      // Actualizar ultimo_acceso en Firestore
       await updateDoc(doc(db, 'usuarios', firebaseUser.uid), {
         ultimo_acceso: serverTimestamp()
       })
@@ -142,22 +125,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(mappedUser)
       localStorage.setItem('user', JSON.stringify(mappedUser))
 
-      // Si el usuario marcó "Recordarme", guardar información en cookies
       if (rememberMe) {
-        setCookie('rememberUser', 'true', 30) // 30 días
+        setCookie('rememberUser', 'true', 30)
         setCookie('userEmail', email, 30)
       } else {
-        // Si no marcó recordar, eliminar cookies existentes
         deleteCookie('rememberUser')
         deleteCookie('userEmail')
       }
 
-      // Redirigir al dashboard
-      navigate('/intranet/dashboard')
+
     } catch (error: any) {
       console.error('Error en login:', error)
-
-      // Lanzar error con mensaje más amigable
       if (error.code === 'auth/user-not-found') {
         throw new Error('No encontramos una cuenta con este correo electrónico.')
       } else if (error.code === 'auth/wrong-password') {
@@ -183,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signOut(auth)
       setUser(null)
       localStorage.removeItem('user')
-      // Eliminar cookies al cerrar sesión
       deleteCookie('rememberUser')
       deleteCookie('userEmail')
       navigate('/')
@@ -197,7 +174,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sendPasswordResetEmail(auth, email)
     } catch (error: any) {
       console.error('Error al enviar correo de recuperación:', error)
-
       if (error.code === 'auth/user-not-found') {
         throw new Error('No existe una cuenta con este correo electrónico.')
       } else if (error.code === 'auth/invalid-email') {
@@ -216,14 +192,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user')
         return
       }
-
-      // Obtener datos del usuario desde Firestore
       const userDoc = await getDoc(doc(db, 'usuarios', currentUser.uid))
-
       if (userDoc.exists()) {
         const userData = userDoc.data()
-
-        // Verificar si el usuario está activo
         if (userData.activo) {
           const mappedUser: User = {
             uid: currentUser.uid,
@@ -235,13 +206,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(mappedUser)
           localStorage.setItem('user', JSON.stringify(mappedUser))
         } else {
-          // Usuario inactivo
           await signOut(auth)
           setUser(null)
           localStorage.removeItem('user')
         }
       } else {
-        // Usuario no existe en Firestore
         await signOut(auth)
         setUser(null)
         localStorage.removeItem('user')

@@ -1,149 +1,256 @@
 // src/pages/intranet/modules/RecepcionistaDashboard.tsx
-import { FaClipboardCheck, FaClock, FaCheckCircle, FaUser, FaBox } from 'react-icons/fa'
+import { useState, useEffect } from 'react'
+import { collection, getDocs } from 'firebase/firestore'
+import { db } from '../../../config/firebase'
+import { useAuth } from '../../../context/AuthContext'
+import Loader from '../../../components/Loader'
+import { 
+  FaClipboardList, 
+  FaSync, 
+  FaCheckCircle,
+  FaUser,
+  FaBox,
+  FaCalendarAlt
+} from 'react-icons/fa'
+
+interface WorkOrder {
+  id: string
+  numeroOrden: string
+  cliente: string
+  detalle: string
+  estado: string
+  origen: string
+  esAsignada: boolean
+  timestamp: number
+}
 
 export default function RecepcionistaDashboard() {
-  const todayTasks = [
-    { id: '#1245', client: 'Juan Pérez', items: 'Jeans y Camisas (5 prendas)', priority: 'Alta', stage: 'Recepción' },
-    { id: '#1244', client: 'María González', items: 'Ropa formal (12 prendas)', priority: 'Media', stage: 'Planchado' },
-    { id: '#1243', client: 'Carlos Ruiz', items: 'Ropa deportiva (8 prendas)', priority: 'Alta', stage: 'Secado' },
-    { id: '#1242', client: 'Ana Silva', items: 'Ropa de cama (15 prendas)', priority: 'Baja', stage: 'Lavado' }
-  ]
+  const { user } = useAuth()
+  
+  // Estados
+  const [activeTab, setActiveTab] = useState<'solucion1' | 'solucion2'>('solucion1')
+  const [viewMode, setViewMode] = useState<'mis-tareas' | 'cola-general'>('cola-general')
+  const [loading, setLoading] = useState(true)
+  const [orders, setOrders] = useState<WorkOrder[]>([])
+  const [kpis, setKpis] = useState({ asignadas: 0, completadas: 0, colaGeneral: 0 })
 
-  const readyOrders = [
-    { id: '#1240', client: 'Pedro Morales', items: '6 prendas', readyTime: '14:30' },
-    { id: '#1238', client: 'Laura Castro', items: '9 prendas', readyTime: '15:00' },
-    { id: '#1235', client: 'Roberto Díaz', items: '4 prendas', readyTime: '15:45' }
-  ]
+  // --- LOGICA DE TAREAS ---
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const newOrders: WorkOrder[] = []
+      let countAsignadas = 0
+      let countCompletadas = 0
+      let countCola = 0
+      const workerName = user?.name?.toLowerCase() || ''
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Alta': return 'bg-red-100 text-red-600 border-red-200'
-      case 'Media': return 'bg-yellow-100 text-yellow-600 border-yellow-200'
-      case 'Baja': return 'bg-green-100 text-green-600 border-green-200'
-      default: return 'bg-gray-100 text-gray-600 border-gray-200'
+      if (activeTab === 'solucion1') {
+        // --- Solución 1: G5 (Empresa/Particular) ---
+        const [snapEmp, snapPart] = await Promise.all([
+          getDocs(collection(db, 'comandas_empresa_grupo_5')),
+          getDocs(collection(db, 'comandas_particular_grupo_5'))
+        ])
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const processG5 = (docs: any[], tipo: string) => {
+          docs.forEach(doc => {
+            const data = doc.data()
+            const fases = data.fases || {}
+            let esMiTarea = false
+            let estadoTarea = data.estado || 'Pendiente'
+
+            Object.values(fases).forEach((fase: any) => {
+              if (fase.encargado && fase.encargado.toLowerCase().includes(workerName)) {
+                esMiTarea = true
+                if (fase.estado === 'completado') countCompletadas++
+              }
+            })
+
+            let fechaObj = new Date()
+            if (data.fechaCreacion) fechaObj = new Date(data.fechaCreacion)
+
+            const order: WorkOrder = {
+              id: doc.id,
+              numeroOrden: data.numeroOrden || 'S/N',
+              cliente: data.cliente?.nombre || 'Cliente G5',
+              detalle: `Pedido ${tipo}`,
+              estado: estadoTarea,
+              origen: `Eq.5 (${tipo})`,
+              esAsignada: esMiTarea,
+              timestamp: fechaObj.getTime()
+            }
+
+            const st = estadoTarea.toLowerCase()
+            if (!st.includes('finalizado') && !st.includes('entregado')) {
+              countCola++
+              if (esMiTarea && !st.includes('completado')) countAsignadas++
+            }
+            newOrders.push(order)
+          })
+        }
+        processG5(snapEmp.docs, 'Empresa')
+        processG5(snapPart.docs, 'Particular')
+
+      } else {
+        // --- Solución 2: G2 (Comandas) + G3 (Seguimiento) ---
+        const [snapG2, snapSeguimiento] = await Promise.all([
+          getDocs(collection(db, 'comandas_2')),
+          getDocs(collection(db, 'seguimiento_3'))
+        ])
+
+        // Crear mapa de seguimiento para búsqueda rápida
+        const seguimientoMap = new Map()
+        snapSeguimiento.forEach(doc => {
+          const data = doc.data()
+          if (data.numeroOrden) seguimientoMap.set(data.numeroOrden, data)
+          if (data.comanda_id) seguimientoMap.set(data.comanda_id, data)
+        })
+
+        snapG2.forEach(doc => {
+          const data = doc.data()
+          const estado = data.estado || 'Pendiente'
+          
+          // Buscar asignación en seguimiento_3
+          let esMiTarea = false
+          const segData = seguimientoMap.get(data.numeroOrden) || seguimientoMap.get(doc.id)
+          
+          if (segData) {
+            // Verificamos si el usuario está en 'operariosAsignados' o en 'desmanche'
+            if (segData.operariosAsignados && segData.operariosAsignados[user?.uid || '']) esMiTarea = true
+            if (segData.desmanche?.operarioNombre?.toLowerCase().includes(workerName)) esMiTarea = true
+          }
+
+          let fechaObj = new Date()
+          if (data.fechaIngreso?.seconds) fechaObj = new Date(data.fechaIngreso.seconds * 1000)
+
+          const order: WorkOrder = {
+            id: doc.id,
+            numeroOrden: data.numeroOrden || 'ORD-G2',
+            cliente: data.nombreCliente || 'Cliente G2',
+            detalle: `${data.prendas?.length || 0} prendas`,
+            estado: estado,
+            origen: 'Eq.2 + Eq.3',
+            esAsignada: esMiTarea,
+            timestamp: fechaObj.getTime()
+          }
+
+          const st = estado.toLowerCase()
+          if (st === 'activa' || st === 'en proceso') {
+            countCola++
+            if (esMiTarea) countAsignadas++
+          }
+          newOrders.push(order)
+        })
+      }
+
+      newOrders.sort((a, b) => b.timestamp - a.timestamp)
+      setOrders(newOrders)
+      setKpis({ asignadas: countAsignadas, completadas: countCompletadas, colaGeneral: countCola })
+    } catch (error) {
+      console.error("Worker data error:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
+  useEffect(() => { fetchData() }, [activeTab, user])
+
+  const filteredOrders = viewMode === 'mis-tareas' 
+    ? orders.filter(o => o.esAsignada)
+    : orders
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+    <div className="p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 pb-24">
+      
       {/* Header */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#1a1a2e] mb-1 sm:mb-2">Panel de Recepción</h1>
-            <p className="text-xs sm:text-sm text-[#6b6b7e]">Gestiona tus tareas diarias y pedidos asignados</p>
-          </div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-xl sm:text-3xl font-bold text-slate-800">Panel de Recepción</h1>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">Bienvenido, {user?.name}</p>
+        </div>
+        
+        <div className="flex flex-row gap-2 w-full md:w-auto">
+            <button onClick={fetchData} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-[#ff6b35] transition-colors shadow-sm">
+              <FaSync className={loading ? "animate-spin" : ""} />
+            </button>
         </div>
       </div>
 
-      {/* Tarjetas de resumen */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md p-4 sm:p-5 md:p-6 border-2 border-[#f0f0f5]">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-              <FaClipboardCheck className="text-lg sm:text-xl md:text-2xl" />
-            </div>
-            <div>
-              <p className="text-[10px] sm:text-xs md:text-sm text-[#6b6b7e] font-semibold uppercase tracking-wide">Tareas Pendientes</p>
-              <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]">{todayTasks.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md p-4 sm:p-5 md:p-6 border-2 border-[#f0f0f5]">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#ff6b35] to-[#e85d2e] rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-              <FaClock className="text-lg sm:text-xl md:text-2xl" />
-            </div>
-            <div>
-              <p className="text-[10px] sm:text-xs md:text-sm text-[#6b6b7e] font-semibold uppercase tracking-wide">En Proceso</p>
-              <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]">8</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md p-4 sm:p-5 md:p-6 border-2 border-[#f0f0f5]">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white flex-shrink-0">
-              <FaCheckCircle className="text-lg sm:text-xl md:text-2xl" />
-            </div>
-            <div>
-              <p className="text-[10px] sm:text-xs md:text-sm text-[#6b6b7e] font-semibold uppercase tracking-wide">Completados Hoy</p>
-              <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]">12</p>
-            </div>
-          </div>
+      {/* Tabs Solución */}
+      <div className="w-full overflow-x-auto pb-1 sm:pb-0">
+        <div className="bg-slate-100 p-1 rounded-xl flex w-fit">
+            <button onClick={() => setActiveTab('solucion1')} className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'solucion1' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            Solución 1
+            </button>
+            <button onClick={() => setActiveTab('solucion2')} className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'solucion2' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+            Solución 2
+            </button>
         </div>
       </div>
 
-      {/* Secciones principales */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-        {/* Últimos pedidos recibidos */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-[#f0f0f5] overflow-hidden">
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-[#f0f0f5]">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#1a1a2e]">Últimos Pedidos Recibidos</h2>
+      {loading ? (
+        <div className="h-64 flex items-center justify-center"><Loader text="Cargando tareas..." /></div>
+      ) : (
+        <div className="space-y-6 animate-fadeIn">
+          
+          {/* KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden col-span-2 md:col-span-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 relative">Pendientes Planta</p>
+              <p className="text-3xl font-bold text-blue-600 mt-1 z-10 relative">{kpis.colaGeneral}</p>
+              <FaClipboardList className="absolute -right-4 -bottom-4 text-6xl text-blue-50 opacity-50" />
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 relative">Mis Asignaciones</p>
+              <p className="text-3xl font-bold text-[#ff6b35] mt-1 z-10 relative">{kpis.asignadas}</p>
+              <FaUser className="absolute -right-4 -bottom-4 text-6xl text-orange-50 opacity-50" />
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider z-10 relative">Mis Completadas</p>
+              <p className="text-3xl font-bold text-green-600 mt-1 z-10 relative">{kpis.completadas}</p>
+              <FaCheckCircle className="absolute -right-4 -bottom-4 text-6xl text-green-50 opacity-50" />
+            </div>
           </div>
-          <div className="p-3 sm:p-4 md:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              {todayTasks.map((task) => (
-                <div key={task.id} className="p-3 sm:p-4 bg-[#f8f9fa] rounded-lg sm:rounded-xl border-2 border-[#f0f0f5] hover:border-[#ffded0]">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-0 mb-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm sm:text-base text-[#1a1a2e] mb-1">{task.id} - {task.client}</p>
-                      <p className="text-xs sm:text-sm text-[#6b6b7e]">{task.items}</p>
-                    </div>
-                    <span className={`px-2.5 py-1 text-[10px] sm:text-xs font-semibold rounded-full border-2 ${getPriorityColor(task.priority)} self-start whitespace-nowrap`}>
-                      {task.priority}
-                    </span>
+
+          {/* Filtro Vista */}
+          <div className="flex border-b border-slate-200 overflow-x-auto">
+            <button onClick={() => setViewMode('cola-general')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${viewMode === 'cola-general' ? 'border-[#ff6b35] text-[#ff6b35]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+              Cola General
+            </button>
+            <button onClick={() => setViewMode('mis-tareas')} className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${viewMode === 'mis-tareas' ? 'border-[#ff6b35] text-[#ff6b35]' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+              Mis Asignaciones
+            </button>
+          </div>
+
+          {/* Lista */}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <div key={order.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded-md tracking-wide">{order.origen}</span>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${order.estado.toLowerCase().includes('completado') ? 'bg-green-100 text-green-700' : 'bg-amber-50 text-amber-700'}`}>{order.estado}</span>
                   </div>
-                  <div className="flex items-center gap-2 mt-2 sm:mt-3">
-                    <span className="px-2.5 sm:px-3 py-1 bg-gradient-to-r from-[#ff6b35] to-[#e85d2e] text-white text-[10px] sm:text-xs font-semibold rounded-full">
-                      {task.stage}
-                    </span>
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-bold text-slate-800 group-hover:text-[#ff6b35] transition-colors">{order.numeroOrden}</h3>
+                    {order.esAsignada && <span className="text-[10px] bg-[#ff6b35] text-white px-2 py-0.5 rounded-full font-bold">ASIGNADA</span>}
+                  </div>
+                  <p className="text-sm text-slate-500 mb-1 flex items-center gap-2"><FaUser className="text-xs opacity-50" /> {order.cliente}</p>
+                  <p className="text-xs text-slate-400 mb-4 flex items-center gap-2"><FaCalendarAlt className="text-[10px]" /> {new Date(order.timestamp).toLocaleDateString()}</p>
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="text-xs text-slate-500 flex items-center gap-1 font-medium"><FaBox className="text-slate-400" /> {order.detalle}</div>
                   </div>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="col-span-full py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                <FaClipboardList className="mx-auto text-3xl mb-2 opacity-20" />
+                <p className="text-slate-500 font-medium">No hay tareas aquí</p>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Pedidos listos para empaque */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-[#f0f0f5] overflow-hidden">
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b-2 border-[#f0f0f5]">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-[#1a1a2e]">Pedidos Listos para Empaque</h2>
-          </div>
-          <div className="p-3 sm:p-4 md:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              {readyOrders.map((order) => (
-                <div key={order.id} className="p-3 sm:p-4 bg-green-50 rounded-lg sm:rounded-xl border-2 border-green-200 hover:border-green-300">
-                  <div className="flex items-start justify-between mb-2 sm:mb-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm sm:text-base text-[#1a1a2e]">{order.id}</p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <FaUser className="text-[10px] text-[#6b6b7e]" />
-                        <p className="text-xs sm:text-sm text-[#6b6b7e]">{order.client}</p>
-                      </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-[10px] text-[#6b6b7e]">Listo a las</p>
-                      <p className="text-xs sm:text-sm font-bold text-green-600">{order.readyTime}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-2 mt-2 sm:mt-3">
-                    <div className="flex items-center gap-1.5">
-                      <FaBox className="text-[10px] text-[#6b6b7e]" />
-                      <p className="text-xs sm:text-sm text-[#6b6b7e]">{order.items}</p>
-                    </div>
-                    <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-600 text-white text-[10px] sm:text-xs font-semibold rounded-lg hover:bg-green-700 whitespace-nowrap">
-                      Marcar Empacado
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
-
