@@ -38,7 +38,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
   const { user } = useAuth()
   const navigate = useNavigate()
   const [expandedMenus, setExpandedMenus] = useState<string[]>([])
-  
+
   // Estado para controlar la pantalla de carga al salir a otros sistemas
   const [isRedirecting, setIsRedirecting] = useState(false)
 
@@ -81,7 +81,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'seguimiento',
       label: 'Seguimiento',
       icon: <FaClipboardList />,
-      roles: ['Administrador', 'Trabajador', 'Recepcionista', 'Cliente'],
+      roles: ['Administrador', 'Trabajador', 'Cliente'],
       subItems: [
         { label: 'Equipo 1', url: 'https://seguimiento-ot-kohl.vercel.app/' },
         { label: 'Equipo 3', url: 'https://lavanderia-el-cobre-spa.vercel.app/' }
@@ -91,7 +91,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
       id: 'orders',
       label: 'Comandas',
       icon: <FaFileInvoice />,
-      roles: ['Administrador', 'Recepcionista'], // Trabajador quitado según requerimiento anterior
+      roles: ['Administrador', 'Recepcionista'],
       subItems: [
         { label: 'Equipo 2', url: 'https://lavanderia-el-cobre-sigma.vercel.app' },
         { label: 'Equipo 5', url: 'https://el-cobre-s-pa-jfsm.vercel.app/' }
@@ -128,10 +128,10 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
   return (
     <>
       {/* Loader de Redirección Externa */}
-      <Loader 
-        fullScreen 
-        isLoading={isRedirecting} 
-        text="Cargando Credenciales..." 
+      <Loader
+        fullScreen
+        isLoading={isRedirecting}
+        text="Cargando Credenciales..."
       />
 
       {/* Overlay para móvil */}
