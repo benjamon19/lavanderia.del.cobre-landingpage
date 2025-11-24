@@ -12,7 +12,7 @@ interface LoginProps {
   onOpenRegister: () => void
 }
 
-const URL_APP_REPARTIDOR = 'http://localhost:5174/';
+const URL_APP_REPARTIDOR = 'https://lavanderia-el-cobre-spa.vercel.app/';
 
 export default function Login({ isOpen, onClose, onOpenRegister }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false)
