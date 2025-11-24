@@ -1,14 +1,12 @@
 // src/pages/intranet/modules/WorkerDashboard.tsx
 import { useState, useEffect } from 'react'
-import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../../config/firebase'
 import { useAuth } from '../../../context/AuthContext'
 import Loader from '../../../components/Loader'
 import { 
   FaClipboardList, 
   FaSync, 
-  FaExclamationTriangle, 
-  FaTimes, 
   FaCheckCircle,
   FaUser,
   FaBox,
@@ -26,13 +24,6 @@ interface WorkOrder {
   timestamp: number
 }
 
-interface StockItem {
-  id: string
-  name: string
-  currentStock: number
-  selected: boolean
-}
-
 export default function WorkerDashboard() {
   const { user } = useAuth()
   
@@ -42,12 +33,6 @@ export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true)
   const [orders, setOrders] = useState<WorkOrder[]>([])
   const [kpis, setKpis] = useState({ asignadas: 0, completadas: 0, colaGeneral: 0 })
-
-  // Modal Stock
-  const [showStockModal, setShowStockModal] = useState(false)
-  const [submittingStock, setSubmittingStock] = useState(false)
-  const [stockSuccess, setStockSuccess] = useState(false)
-  const [dynamicStockItems, setDynamicStockItems] = useState<StockItem[]>([])
 
   // --- LOGICA DE TAREAS ---
   const fetchData = async () => {
@@ -133,10 +118,6 @@ export default function WorkerDashboard() {
             // Verificamos si el usuario está en 'operariosAsignados' o en 'desmanche'
             if (segData.operariosAsignados && segData.operariosAsignados[user?.uid || '']) esMiTarea = true
             if (segData.desmanche?.operarioNombre?.toLowerCase().includes(workerName)) esMiTarea = true
-            // Si hay un historial, verificar si trabajó antes
-            if (segData.historialEstados) {
-               // Opcional: Contar completadas si aparece en el historial
-            }
           }
 
           let fechaObj = new Date()
@@ -172,77 +153,6 @@ export default function WorkerDashboard() {
     }
   }
 
-  // --- LOGICA DE STOCK DINÁMICO ---
-  const openStockModal = async () => {
-    setShowStockModal(true)
-    // Cargar items según la solución activa
-    try {
-      const items: StockItem[] = []
-      
-      if (activeTab === 'solucion1') {
-        // Simulación de items Eq 7 (Inventario) ya que no tenemos la colección aún
-        // Si la tuvieras, sería getDocs(collection(db, 'inventario_gestion_7'))
-        items.push(
-          { id: '1', name: 'Detergente Industrial', currentStock: 50, selected: false },
-          { id: '2', name: 'Suavizante Textil', currentStock: 20, selected: false },
-          { id: '3', name: 'Bolsas de Entrega', currentStock: 100, selected: false }
-        )
-      } else {
-        // Solución 2: Cargar desde productos_4
-        const snapProd = await getDocs(collection(db, 'productos_4'))
-        snapProd.forEach(doc => {
-          const d = doc.data()
-          items.push({
-            id: doc.id,
-            name: d.name || d.brand || 'Producto sin nombre',
-            currentStock: Number(d.quantity || 0),
-            selected: false
-          })
-        })
-      }
-      setDynamicStockItems(items)
-    } catch (e) {
-      console.error("Error loading stock items", e)
-    }
-  }
-
-  const handleToggleStockItem = (id: string) => {
-    setDynamicStockItems(prev => prev.map(item => 
-      item.id === id ? { ...item, selected: !item.selected } : item
-    ))
-  }
-
-  const handleSubmitStock = async () => {
-    setSubmittingStock(true)
-    try {
-      const selected = dynamicStockItems.filter(i => i.selected)
-      if (selected.length === 0) return
-
-      const mensaje = `Stock crítico reportado: ${selected.map(i => `${i.name} (${i.currentStock})`).join(', ')}`
-
-      // Enviar a la colección de alertas correspondiente
-      const collectionName = activeTab === 'solucion1' ? 'alertas_gestion_7' : 'alertas_equipo_4' // Creamos alertas_4 si no existe
-      
-      await addDoc(collection(db, collectionName), {
-        fecha: serverTimestamp(),
-        mensaje: mensaje,
-        nivel: 'Critico',
-        visto: false,
-        reportadoPor: user?.name || 'Operario'
-      })
-
-      setStockSuccess(true)
-      setTimeout(() => {
-        setStockSuccess(false)
-        setShowStockModal(false)
-      }, 2000)
-    } catch (error) {
-      console.error("Error sending stock alert:", error)
-    } finally {
-      setSubmittingStock(false)
-    }
-  }
-
   useEffect(() => { fetchData() }, [activeTab, user])
 
   const filteredOrders = viewMode === 'mis-tareas' 
@@ -260,9 +170,6 @@ export default function WorkerDashboard() {
         </div>
         
         <div className="flex flex-row gap-2 w-full md:w-auto">
-           <button onClick={openStockModal} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 transition-colors font-medium text-sm shadow-sm whitespace-nowrap">
-              <FaExclamationTriangle /> Reportar Stock
-            </button>
             <button onClick={fetchData} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-[#ff6b35] transition-colors shadow-sm">
               <FaSync className={loading ? "animate-spin" : ""} />
             </button>
@@ -273,10 +180,10 @@ export default function WorkerDashboard() {
       <div className="w-full overflow-x-auto pb-1 sm:pb-0">
         <div className="bg-slate-100 p-1 rounded-xl flex w-fit">
             <button onClick={() => setActiveTab('solucion1')} className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'solucion1' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            Solución 1 <span className="text-[10px] opacity-70 ml-1">(Eq. 5)</span>
+            Solución 1
             </button>
             <button onClick={() => setActiveTab('solucion2')} className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${activeTab === 'solucion2' ? 'bg-white text-[#ff6b35] shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            Solución 2 <span className="text-[10px] opacity-70 ml-1">(Eq. 2/3)</span>
+            Solución 2
             </button>
         </div>
       </div>
@@ -339,54 +246,6 @@ export default function WorkerDashboard() {
               <div className="col-span-full py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                 <FaClipboardList className="mx-auto text-3xl mb-2 opacity-20" />
                 <p className="text-slate-500 font-medium">No hay tareas aquí</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Modal Stock Dinámico */}
-      {showStockModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="bg-red-50 p-6 border-b border-red-100 flex justify-between items-start shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-500"><FaExclamationTriangle className="text-xl" /></div>
-                <div><h2 className="text-lg font-bold text-red-900">Reportar Stock</h2><p className="text-sm text-red-600">Selecciona items críticos</p></div>
-              </div>
-              <button onClick={() => setShowStockModal(false)} className="text-red-400 hover:text-red-600"><FaTimes className="text-xl" /></button>
-            </div>
-
-            <div className="p-6 overflow-y-auto">
-              {stockSuccess ? (
-                <div className="text-center py-8">
-                  <FaCheckCircle className="text-5xl text-green-500 mx-auto mb-4 animate-bounce" />
-                  <h3 className="text-xl font-bold text-slate-800">¡Enviado!</h3>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {dynamicStockItems.map((item) => (
-                    <label key={item.id} className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${item.selected ? 'border-red-500 bg-red-50' : 'border-slate-100 hover:bg-slate-50'}`}>
-                      <input type="checkbox" className="hidden" checked={item.selected} onChange={() => handleToggleStockItem(item.id)} />
-                      <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 ${item.selected ? 'bg-red-500 border-red-500' : 'border-slate-300 bg-white'}`}>
-                        {item.selected && <FaCheckCircle className="text-white text-xs" />}
-                      </div>
-                      <div className="flex-1">
-                        <span className={`font-medium block ${item.selected ? 'text-red-800' : 'text-slate-700'}`}>{item.name}</span>
-                        <span className="text-xs text-slate-400">Stock actual: {item.currentStock}</span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {!stockSuccess && (
-              <div className="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 shrink-0">
-                <button onClick={() => setShowStockModal(false)} className="flex-1 py-3 bg-white border border-slate-200 text-slate-600 font-semibold rounded-xl" disabled={submittingStock}>Cancelar</button>
-                <button onClick={handleSubmitStock} disabled={submittingStock || !dynamicStockItems.some(i => i.selected)} className="flex-1 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 disabled:opacity-50">
-                  {submittingStock ? <FaSync className="animate-spin mx-auto" /> : 'Enviar Alerta'}
-                </button>
               </div>
             )}
           </div>
