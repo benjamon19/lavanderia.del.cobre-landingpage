@@ -37,7 +37,7 @@ export default function IntranetNavbar({ onToggleSidebar }: IntranetNavbarProps)
             {/* Logo - Solo visible en desktop */}
             <div className="hidden lg:flex items-center gap-2 sm:gap-3 min-w-0">
               <img 
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="Lavandería el Cobre" 
                 className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 object-contain flex-shrink-0"
               />

@@ -61,7 +61,7 @@ export default function Hero({ scrollToSection }: HeroProps) {
               <div className="relative flex justify-center lg:justify-end">
                 <div className="relative w-full max-w-[460px] lg:max-w-[480px] xl:max-w-[520px] 2xl:max-w-[600px] pb-6 sm:pb-8 lg:pb-6 xl:pb-10 2xl:pb-12 px-4 md:px-2 lg:pr-4 xl:px-0">
                   <img 
-                    src="/images/hero/lavanderia-principal.png" 
+                    src="/images/hero/lavanderia-principal.webp" 
                     alt="Ilustración de servicios de Lavandería del Cobre en Calama" 
                     className="w-full h-auto object-contain"
                     loading="eager"

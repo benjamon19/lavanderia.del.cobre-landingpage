@@ -155,7 +155,7 @@ export default function Sidebar({ activeModule, isOpen, onClose }: SidebarProps)
         {/* Header del sidebar (Solo móvil) */}
         <div className="h-16 bg-white border-b-2 border-[#f0f0f5] flex items-center justify-between px-4 lg:hidden">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain sm:hidden" />
+            <img src="/logo.webp" alt="Logo" className="w-10 h-10 object-contain sm:hidden" />
             <p className="text-xs text-[#6b6b7e]">Sistema Intranet</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-[#fff4f0] text-[#6b6b7e]">

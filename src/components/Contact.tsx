@@ -101,7 +101,7 @@ export default function Contact() {
           {/* Imagen */}
           <div className="hidden lg:block lg:col-span-2">
             <img
-              src="/images/contact/contacto-principal.png"
+              src="/images/contact/contacto-principal.webp"
               alt="Contacto Lavandería el Cobre"
               className="w-full h-auto object-contain rounded-2xl"
             />

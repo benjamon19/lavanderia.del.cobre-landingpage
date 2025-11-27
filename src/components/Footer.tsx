@@ -27,7 +27,7 @@ export default function Footer({ scrollToSection }: FooterProps) {
             <div className="flex items-center mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-white to-[#ffe8e0] rounded-xl flex items-center justify-center shadow-lg p-2">
                 <img 
-                  src="/logo.png" 
+                  src="/logo.webp" 
                   alt="Lavandería el Cobre" 
                   className="w-full h-full object-contain"
                 />

@@ -83,7 +83,7 @@ export default function Navbar({ scrollToSection }: NavbarProps) {
               aria-label="Ir al inicio"
             >
               <img 
-                src="/logo.png" 
+                src="/logo.webp" 
                 alt="" 
                 className="w-9 h-9 sm:w-10 sm:h-10 lg:w-10 lg:h-10 xl:w-11 xl:h-11 2xl:w-12 2xl:h-12 object-contain transition-all group-hover:scale-105"
               />
