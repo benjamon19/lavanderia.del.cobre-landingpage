@@ -65,6 +65,7 @@ export default function Hero({ scrollToSection }: HeroProps) {
                     alt="Ilustración de servicios de Lavandería del Cobre en Calama" 
                     className="w-full h-auto object-contain"
                     loading="eager"
+                    fetchPriority="high"
                   />
                 </div>
               </div>
