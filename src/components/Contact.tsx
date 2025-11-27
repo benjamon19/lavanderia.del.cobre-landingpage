@@ -217,10 +217,9 @@ export default function Contact() {
                   {status.error}
                 </p>
               )}
-
               <button
                 type="submit"
-                className="w-full bg-white text-[#ff6b35] px-8 py-4 rounded-xl hover:bg-[#fff4f0] transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-white text-[#c2410c] px-8 py-4 rounded-xl hover:bg-[#fff4f0] transition-all font-bold text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={status.loading}
                 aria-label="Enviar mensaje"
               >
